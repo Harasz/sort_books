@@ -9,7 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_Form(object):
+class Login_form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(400, 306)
@@ -62,7 +62,7 @@ class Ui_Form(object):
         self.loginBtn.setObjectName("loginBtn")
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
-        self.loginBtn.clicked.connect(lambda: self.loginAction())
+        self.loginBtn.pressed.connect(lambda: self.loginAction())
 
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     Form = QtWidgets.QWidget()
-    ui = Ui_Form()
+    ui = Login_form()
     ui.setupUi(Form)
     Form.show()
     sys.exit(app.exec_())
