@@ -26,7 +26,7 @@ from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from hashlib import sha512
 import psycopg2
-import random
+import random, datetime
 
 app = Flask(__name__)
 api = Api(app)
@@ -34,8 +34,10 @@ api = Api(app)
 parser = reqparse.RequestParser()
 parser.add_argument('login', type=str)
 parser.add_argument('pass_', type=str)
-parser.add_argument('name', type=str)
-parser.add_argument('address', type=str)
+parser.add_argument('arg1', type=str)
+parser.add_argument('arg2', type=str)
+parser.add_argument('book_id', type=int)
+parser.add_argument('name_id', type=int)
 
 
 class Sort_Books_webApi(Resource):
@@ -64,16 +66,122 @@ class Sort_Books_addRe(Resource):
 		#if not data['key'] in auth_k:
 		#	return {'status': 'brak autoryzacji'}, 401
 		
+		print(data['arg1'], data['arg2'])
+		try:
+			cur.execute("SELECT * FROM librarians.readers WHERE name='%s' AND addres='%s';" % (data['arg1'], data['arg2']))
+			resp = cur.fetchall()
+			if resp:
+				return {'status': 'istnieje'}, 507
+			else:
+				cur.execute("SELECT * FROM librarians.readers")
+				resp = cur.fetchall()
+				cur.execute("INSERT INTO librarians.readers VALUES ("+str(len(resp))+", '%s', '%s');" % (data['arg1'], data['arg2']))
+				return {'status': 'dodano'}, 201
+		except:
+			return {'status': 'blad'}, 500
+
+
+class Sort_Books_addBook(Resource):
+			
+	def post(self):
+		data = parser.parse_args()
+		
+		#if not data['key'] in auth_k:
+		#	return {'status': 'brak autoryzacji'}, 401
+		
+		try:
+			cur.execute("SELECT * FROM librarians.books WHERE title='%s' AND author='%s';" % (data['arg1'], data['arg2']))
+			resp = cur.fetchall()
+			if resp:
+				return {'status': 'istnieje'}, 507
+			else:
+				cur.execute("SELECT * FROM librarians.books")
+				resp = cur.fetchall()
+				cur.execute("INSERT INTO librarians.books VALUES ( "+str(len(resp))+", '"+data['arg1']+"', '"+data['arg2']+"');")
+				return {'status': 'dodano'}, 201
+		except:
+			return {'status': 'blad'}, 500
+		
+class Sort_Books_getReaders(Resource):
+			
+	def post(self):
+		
+		#if not data['key'] in auth_k:
+		#	return {'status': 'brak autoryzacji'}, 401
+		
+		try:
+			cur.execute("SELECT * FROM librarians.readers WHERE id_r>0;")
+			resp = cur.fetchall()
+			if resp:
+				ret = {}
+				for reader in range(len(resp)):
+					ret.update({reader: resp[reader]})
+				return ret, 200
+			else:
+				return {'status': 'brak danych'}, 204
+		except:
+			return {'status': 'blad'}, 500
+
+class Sort_Books_getBooks(Resource):
+			
+	def post(self):
+		
+		#if not data['key'] in auth_k:
+		#	return {'status': 'brak autoryzacji'}, 401
+		
+		try:
+			cur.execute("SELECT * FROM librarians.books WHERE id_b>0;")
+			resp = cur.fetchall()
+			if resp:
+				ret = {}
+				for reader in range(len(resp)):
+					ret.update({reader: resp[reader]})
+				return ret, 200
+			else:
+				return {'status': 'brak danych'}, 204
+		except:
+			return {'status': 'blad'}, 500
+			
+
+class Sort_Books_getBorrows(Resource):
+			
+	def post(self):
+		
+		#if not data['key'] in auth_k:
+		#	return {'status': 'brak autoryzacji'}, 401
+		
 		#try:
-		cur.execute("SELECT * FROM librarians.readers WHERE name='%s' AND addres='%s';" % (data['name'], data['address']))
+		cur.execute("SELECT return, name_id, book_id, give_back FROM librarians.borrows WHERE id_br>0;")
+		resp = cur.fetchall()
+		if resp:
+			ret = {}
+			for borrow in range(len(resp)):
+				ret.update({borrow: (resp[borrow][0].isoformat(), resp[borrow][1], resp[borrow][2], resp[borrow][3])})
+			return ret, 200
+		else:
+			return {'status': 'brak danych'}, 204
+		#except:
+		#	return {'status': 'blad'}, 500
+
+
+
+
+class Sort_Books_addBorrow(Resource):
+			
+	def post(self):
+		data = parser.parse_args()		
+		#if not data['key'] in auth_k:
+		#	return {'status': 'brak autoryzacji'}, 401
+		
+		#try:
+		cur.execute("SELECT give_back FROM librarians.borrows WHERE name_id='%s' AND book_id='%s' AND give_back='0';" % (data['name_id'], data['book_id']))
 		resp = cur.fetchall()
 		if resp:
 			return {'status': 'istnieje'}, 507
 		else:
-			cur.execute("SELECT * FROM librarians.readers")
+			cur.execute("SELECT * FROM librarians.borrows")
 			resp = cur.fetchall()
-			print(len(resp))
-			cur.execute("INSERT INTO librarians.readers VALUES ("+str(len(resp))+", '%s', '%s');" % (data['name'], data['address']))
+			cur.execute("INSERT INTO librarians.borrows VALUES ("+str(len(resp)+1)+", '%s', '%s', '%s', '%s', '0');" % (data['arg1'], data['arg2'], data['name_id'], data['book_id']))
 			return {'status': 'dodano'}, 201
 		#except:
 		#	return {'status': 'blad'}, 500
@@ -82,12 +190,18 @@ class Sort_Books_addRe(Resource):
 
 api.add_resource(Sort_Books_webApi, '/api/logaction')
 api.add_resource(Sort_Books_addRe, '/api/addre')
+api.add_resource(Sort_Books_addBook, '/api/addbook')
+api.add_resource(Sort_Books_getReaders, '/api/getreader')
+api.add_resource(Sort_Books_getBooks, '/api/getbook')
+api.add_resource(Sort_Books_addBorrow, '/api/borrow')
+api.add_resource(Sort_Books_getBorrows, '/api/getborrow')
 
 if __name__ == '__main__':
 	
 	auth_key = []
 	with psycopg2.connect(dbname='librarians', user='postgres', host='192.168.0.99', password='dsp2017') as conn:
 		try:
+			conn.autocommit = True
 			cur = conn.cursor()
 			app.run(host='0.0.0.0', debug=True)
 		except:
