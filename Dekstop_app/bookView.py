@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import requests, json
+from error import check_con, app_error
 
 class Ui_Form(object):
 
@@ -42,15 +43,17 @@ class Ui_Form(object):
         self.pushButton.setGeometry(QtCore.QRect(310, 20, 61, 21))
         self.pushButton.setObjectName("pushButton")
         self.treeView = QtWidgets.QTreeView(Form)
-        self.treeView.setGeometry(QtCore.QRect(30, 60, 400, 192))
+        self.treeView.setGeometry(QtCore.QRect(30, 60, 401, 192))
         self.treeView.setObjectName("treeView")
-        self.itemModel = QtGui.QStandardItemModel(0, 2)
+        self.itemModel = QtGui.QStandardItemModel(0, 3)
         self.treeView.setModel(self.itemModel)
         self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.treeView.setColumnWidth(0, 200)
+        self.treeView.setColumnWidth(0, 150)
         self.itemModel.setHeaderData(0, QtCore.Qt.Horizontal, 'Tytuł')
-        self.treeView.setColumnWidth(2, 200)
+        self.treeView.setColumnWidth(1, 150)
         self.itemModel.setHeaderData(1, QtCore.Qt.Horizontal, 'Autor')
+        self.treeView.setColumnWidth(2, 100)
+        self.itemModel.setHeaderData(2, QtCore.Qt.Horizontal, 'Dostępnych')
 
         self.lineEdit.textChanged['QString'].connect(self.search)
         self.retranslateUi(Form)
@@ -67,18 +70,17 @@ class Ui_Form(object):
         self.clear_row()
 
         try:
-            resp = requests.post('http://192.168.0.107:5000/api/getbook')
+            resp = requests.post('http://192.168.0.107:5000/api/getbook', data={'key': open('.cache', 'r').read()})
+            if check_con(resp):
+                 return False
         except:
-            error = QtWidgets.QMessageBox()
-            error.setIcon(QtWidgets.QMessageBox.Warning)
-            error.setText("Połączenie z serwerem nie zostało nawiązane.")
-            error.setWindowTitle("Błąd!")
-            return error.exec_()
+            return app_error("Wystąpił błąd przy pobieraniu danych.")
 
         self.data = json.loads(resp.text)
         for key, value in self.data.items():
-            self.itemModel.setItem(int(key), 0, QtGui.QStandardItem(value[1]))
-            self.itemModel.setItem(int(key), 1, QtGui.QStandardItem(value[2]))
+            self.itemModel.setItem(int(key)-1, 0, QtGui.QStandardItem(value[1]))
+            self.itemModel.setItem(int(key)-1, 1, QtGui.QStandardItem(value[2]))
+            self.itemModel.setItem(int(key)-1, 2, QtGui.QStandardItem(str(value[3])))
 
     def search(self):
         cache = self.lineEdit.text()
@@ -86,22 +88,11 @@ class Ui_Form(object):
         i = 0
         for key, value in self.data.items():
             if cache.upper() in value[1].upper() or cache.upper() in value[2].upper() or cache.upper() in '':
-                self.itemModel.setItem(i, 0, QtGui.QStandardItem(value[1]))
-                self.itemModel.setItem(i, 1, QtGui.QStandardItem(value[2]))
+                self.itemModel.setItem(i-1, 0, QtGui.QStandardItem(value[1]))
+                self.itemModel.setItem(i-1, 1, QtGui.QStandardItem(value[2]))
+                self.itemModel.setItem(i-1, 2, QtGui.QStandardItem(str(value[3])))
                 i += 1
 
     def clear_row(self):
         for i in range(self.itemModel.rowCount()):
             self.itemModel.removeRow(i)
-
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())
-

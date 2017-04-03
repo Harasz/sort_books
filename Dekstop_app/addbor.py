@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 import requests, json
+from error import app_error, check_con
 
 class Ui_Form(object):
 
@@ -121,13 +122,10 @@ class Ui_Form(object):
 
     def get_list_reader(self):
         try:
-            resp = requests.post('http://192.168.0.107:5000/api/getreader')
+            resp = requests.post('http://192.168.0.107:5000/api/getreader', data={'key': open('.cache', 'r').read()})
+            check_con(resp)
         except:
-            error = QtWidgets.QMessageBox()
-            error.setIcon(QtWidgets.QMessageBox.Warning)
-            error.setText("Połączenie z serwerem nie zostało nawiązane.")
-            error.setWindowTitle("Błąd!")
-            return error.exec_()
+            return app_error("Wystapił problem przy dodawaniu.")
 
         data = json.loads(resp.text)
         self.list_1 = {}
@@ -139,9 +137,10 @@ class Ui_Form(object):
 
     def get_list_book(self):
         try:
-            resp = requests.post('http://192.168.0.107:5000/api/getbook')
+            resp = requests.post('http://192.168.0.107:5000/api/getbook', data={'key': open('.cache', 'r').read()})
+            check_con(resp)
         except:
-            return 0
+            return app_error("Wystąpił błąd przy pobieraniu danych")
 
         data = json.loads(resp.text)
         self.list_2 = {}
@@ -160,26 +159,18 @@ class Ui_Form(object):
         book = self.lineEdit_2.text()
 
         if reader is '' or book is '':
-            error = QtWidgets.QMessageBox()
-            error.setIcon(QtWidgets.QMessageBox.Warning)
-            error.setText("Uzupełnij wszystkie dane!")
-            error.setWindowTitle("Błąd!")
-            return error.exec_()
+            return app_error("Uzupełnij wszystkie dane")
 
         date_1 = self.dateEdit.date().toPyDate()
         date_2 = self.dateEdit_2.date().toPyDate()
         if date_1 > date_2:
-            error = QtWidgets.QMessageBox()
-            error.setIcon(QtWidgets.QMessageBox.Warning)
-            error.setText("Dats wypożyczenia nie może być większa niż data zwrotu")
-            error.setWindowTitle("Błąd!")
-            return error.exec_()
+            return app_error("Dats wypożyczenia nie może być większa niż data zwrotu")
 
         try:
-            resp = requests.post('http://192.168.0.107:5000/api/borrow', data={'arg1': date_2, 'arg2': date_1, 'name_id': self.list_1[reader], 'book_id': self.list_2[book]})
+            resp = requests.post('http://192.168.0.107:5000/api/borrow', data={'key': open('.cache', 'r').read(), 'arg1': date_2, 'arg2': date_1, 'name_id': self.list_1[reader], 'book_id': self.list_2[book]})
+            check_con(resp)
         except:
-            self.label_5.setStyleSheet("color: red;")
-            return self.label_5.setText("Błąd połączenia z serwerem.")
+            return app_error("Wystąpił błąd przy dodawaniu")
 
         if 507 == resp.status_code:
             self.lineEdit.clear()
@@ -194,15 +185,3 @@ class Ui_Form(object):
         else:
             self.label_5.setStyleSheet("color: red;")
             return self.label_5.setText("Nieznany błąd.")
-
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Ui_Form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())
-

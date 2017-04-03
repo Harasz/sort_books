@@ -7,9 +7,10 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import addre, addbo, addbor, readView, bookView, borrowView
+import addre, addbo, addbor, readView, bookView, borrowView, return_
 
 class Sort_books(object):
+
     def setupUi_2(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -173,7 +174,7 @@ class Sort_books(object):
         self.pushButton_3.clicked.connect(self.update_readList)
         self.pushButton.clicked.connect(self.update_bookList)
         self.pushButton_4.clicked.connect(self.update_borrows)
-        self.pushButton_5.clicked.connect(self.update_borrows)
+        self.pushButton_5.clicked.connect(self.update_return)
         self.pushButton_6.clicked.connect(self.update_books)
         self.pushButton_7.clicked.connect(self.update_addre)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -220,13 +221,19 @@ class Sort_books(object):
         self.borList_ui.setupUi(self.borList)
         self.borList.hide()
 
+        # return list widget
+        self.ret = QtWidgets.QWidget()
+        self.ret_ui = return_.Ui_Form()
+        self.ret_ui.setupUi(self.ret)
+        self.ret.hide()
+
         self.gridLayout.addWidget(self.addre, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.books, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.borrows, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.reList, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.boList, 0, 0, 1, 1)
         self.gridLayout.addWidget(self.borList, 0, 0, 1, 1)
-
+        self.gridLayout.addWidget(self.ret, 0, 0, 1, 1)
 
     def retranslateUi_2(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -268,19 +275,13 @@ class Sort_books(object):
         self.borList_ui.get_list()
         self.borList.show()
 
+    def update_return(self):
+        self.clearWidget()
+        self.ret_ui.get_list()
+        self.ret.show()
+
     def clearWidget(self):
         for i in range(self.gridLayout.count() - 1, -1, -1):
             widget = self.gridLayout.itemAt(i).widget()
             if widget.objectName() != 'groupBox':
                 widget.hide()
-
-
-if __name__ == '__main__':
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Sort_books()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
-    app.exec_()
-

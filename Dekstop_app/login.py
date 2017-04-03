@@ -10,6 +10,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Login_form(object):
+
+
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(400, 306)
@@ -72,14 +74,3 @@ class Login_form(object):
         self.label_2.setText(_translate("Form", "Hasło:"))
         self.loginBtn.setText(_translate("Form", "Zaloguj"))
         self.loginBtn.clicked.connect(self.loginAction)
-
-
-if __name__ == "__main__":
-    import sys
-    app = QtWidgets.QApplication(sys.argv)
-    Form = QtWidgets.QWidget()
-    ui = Login_form()
-    ui.setupUi(Form)
-    Form.show()
-    sys.exit(app.exec_())
-
