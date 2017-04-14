@@ -51,7 +51,8 @@ CREATE TABLE books (
     id_b integer NOT NULL,
     title text NOT NULL,
     author text NOT NULL,
-    count integer NOT NULL
+    count integer NOT NULL,
+    avatar text
 );
 
 
@@ -74,17 +75,50 @@ CREATE TABLE borrows (
 ALTER TABLE borrows OWNER TO postgres;
 
 --
+-- Name: comments; Type: TABLE; Schema: librarians; Owner: postgres
+--
+
+CREATE TABLE comments (
+    id_comment integer NOT NULL,
+    id_b integer NOT NULL,
+    comment text NOT NULL,
+    date date NOT NULL,
+    r_name text NOT NULL
+);
+
+
+ALTER TABLE comments OWNER TO postgres;
+
+--
 -- Name: readers; Type: TABLE; Schema: librarians; Owner: postgres
 --
 
 CREATE TABLE readers (
     id_r integer NOT NULL,
     name text NOT NULL,
-    addres text NOT NULL
+    addres text NOT NULL,
+    email text NOT NULL,
+    pass text NOT NULL,
+    loged boolean NOT NULL,
+    login text NOT NULL
 );
 
 
 ALTER TABLE readers OWNER TO postgres;
+
+--
+-- Name: readers_pref; Type: TABLE; Schema: librarians; Owner: postgres
+--
+
+CREATE TABLE readers_pref (
+    reader_id integer NOT NULL,
+    allow_email boolean NOT NULL,
+    allow_address boolean NOT NULL,
+    allow_profile boolean NOT NULL
+);
+
+
+ALTER TABLE readers_pref OWNER TO postgres;
 
 --
 -- Name: user; Type: TABLE; Schema: librarians; Owner: postgres
@@ -105,13 +139,13 @@ ALTER TABLE "user" OWNER TO postgres;
 -- Data for Name: books; Type: TABLE DATA; Schema: librarians; Owner: postgres
 --
 
-COPY books (id_b, title, author, count) FROM stdin;
-0	null	null	30
-5	Ferdydurke	Witold Gombrowicz	12
-2	Dziady	Adam Mickiewicz	60
-3	Lalka	Bolesław Prus	16
-4	Wesele	Stanisław Wyspiański	4
-1	Pan Tadeusz	Adam Mickiewicz	33
+COPY books (id_b, title, author, count, avatar) FROM stdin;
+0	null	null	30	\N
+2	Dziady	Adam Mickiewicz	60	\N
+3	Lalka	Bolesław Prus	16	\N
+1	Pan Tadeusz	Adam Mickiewicz	33	\N
+4	Wesele	Stanisław Wyspiański	0	\N
+5	Ferdydurke	Witold Gombrowicz	11	\N
 \.
 
 
@@ -132,6 +166,20 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 10	2017-05-01	2017-04-01	3	3	t
 11	2017-05-02	2017-04-02	6	4	f
 12	2017-05-02	2017-04-02	3	1	f
+13	2017-05-13	2017-04-13	3	4	f
+14	2017-05-13	2017-04-13	1	4	f
+15	2017-05-13	2017-04-13	4	4	f
+16	2017-05-13	2017-04-13	2	4	f
+17	2017-05-13	2017-04-13	1	5	t
+18	2017-05-14	2017-04-13	1	5	f
+\.
+
+
+--
+-- Data for Name: comments; Type: TABLE DATA; Schema: librarians; Owner: postgres
+--
+
+COPY comments (id_comment, id_b, comment, date, r_name) FROM stdin;
 \.
 
 
@@ -139,14 +187,27 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 -- Data for Name: readers; Type: TABLE DATA; Schema: librarians; Owner: postgres
 --
 
-COPY readers (id_r, name, addres) FROM stdin;
-1	Jan Kowalski	Katowice, ul. Ogrodowa 2
-2	Adam Kowalski	Katowice, ul. Ogrodowa 3
-3	Janina Kowalska	Katowice, ul. Ogrodowa 2
-4	Eryk Wincenty	Katowice, ul. Ogrodowa 10
-5	Bogumiła Wypch	Katowice, ul. Ogrodowa 23
-0	null	null
-6	Adam Niedbalski	Katowice, Ogrdowa 126
+COPY readers (id_r, name, addres, email, pass, loged, login) FROM stdin;
+4	Eryk Wincenty	Katowice, ul. Ogrodowa 10	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test4
+5	Bogumiła Wypch	Katowice, ul. Ogrodowa 23	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test5
+2	Adam Kowalski	Katowice, ul. Ogrodowa 3	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test2
+1	Jan Kowalski	Katowice, ul. Ogrodowa 2	jan@jan.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test1
+3	Janina Kowalska	Katowice, ul. Ogrodowa 2	asd@ads.pl	d404559f602eab6fd602ac7680dacbfaadd13630335e951f097af3900e9de176b6db28512f2e000b9d04fba5133e8b1c6e8df59db3a8ab9d60be4b97cc9e81db	t	test3
+6	Adam Niedbalski	Katowice, Ogrdowa 126	brak	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	f	test6
+0	null	null	null	null	f	null
+\.
+
+
+--
+-- Data for Name: readers_pref; Type: TABLE DATA; Schema: librarians; Owner: postgres
+--
+
+COPY readers_pref (reader_id, allow_email, allow_address, allow_profile) FROM stdin;
+2	f	f	f
+3	f	t	f
+4	f	f	f
+5	t	f	t
+1	f	t	t
 \.
 
 
@@ -176,11 +237,27 @@ ALTER TABLE ONLY borrows
 
 
 --
+-- Name: comments comments_pkey; Type: CONSTRAINT; Schema: librarians; Owner: postgres
+--
+
+ALTER TABLE ONLY comments
+    ADD CONSTRAINT comments_pkey PRIMARY KEY (id_comment);
+
+
+--
 -- Name: readers readers_pkey; Type: CONSTRAINT; Schema: librarians; Owner: postgres
 --
 
 ALTER TABLE ONLY readers
     ADD CONSTRAINT readers_pkey PRIMARY KEY (id_r);
+
+
+--
+-- Name: readers_pref readers_pref_pkey; Type: CONSTRAINT; Schema: librarians; Owner: postgres
+--
+
+ALTER TABLE ONLY readers_pref
+    ADD CONSTRAINT readers_pref_pkey PRIMARY KEY (reader_id);
 
 
 --
