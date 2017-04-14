@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %} Konfiguracja konta {% endblock %}
+{% block content %}
+	
+		{% if error: %}
+			<div class="alert alert-danger alert-dismissable">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+  				<strong>Uwaga!</strong> {{error}}
+			</div>
+		{% endif %}
+
+		{% if step==1 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+		<span style="font-size: 120%;">Krok 1/4</span>
+			<p>To twoje pierwsze logowanie, więc pozostało Ci jedynie dostosować profil.</p>
+			<form method="post">
+
+				<input type="email" name="email" placeholder="Podaj e-mail" class="adjust" required> <br>
+				<input type="email" name="email2" placeholder="Powtórz e-mail" class="adjust" required> <br>
+
+				<input type="submit" value="Dalej" class="adjust">
+
+			</form>
+		</div>
+		{% elif step==2 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+		<span style="font-size: 120%;">Krok 2/4</span>
+			<p>Email został zmieniony, teraz czas na hasło!</p>
+			<form method="post">
+
+				<input type="password" name="pass" placeholder="Nowe hasło" class="adjust" required> <br>
+				<input type="password" name="pass2" placeholder="Powtórz hasło" class="adjust" required> <br>
+
+				<input type="submit" value="Dalej" class="adjust">
+
+			</form>
+		</div>
+		{% elif step==3 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+		<span style="font-size: 120%;">Krok 3/4</span>
+			<p>Hasło zostało zmienione, teraz czas na ustawienia prywatności!</p>
+			<form method="post">
+
+				<label><input type="checkbox" name="allow_profile"> Udostępnienie profilu publicznie.</label><br>
+				<label><input type="checkbox" name="allow_email"> Pokazanie adresu e-mail publicznie w profilu.</label><br>
+				<label><input type="checkbox" name="allow_address"> Pokazanie adresu zamieszkania publicznie w profilu.</label><br>
+
+				<input type="submit" value="Dalej" class="adjust">
+
+			</form>
+		</div>
+		{% elif step==4: %}
+		<div class="panel_login" style="width: 70%; margin-left: 15%; height: 350px;">
+			<span style="font-size: 120%;">Krok 4/4</span>
+			<p>Ustawienia zostały zapisane. To już ostatni punkt, pokazujemy Ci twoje dane.</p>
+			Informacje dla konta numer {{ session['auth']['id'] }}:<br>
+			<table class="table table-condensed">
+				<thead>
+					<tr>
+						<th>Imię i nazwisko</th>
+						<th>Adres zamieszkania</th>
+						<th>E-mail</th>
+						<th>Login</th>
+						<th>Hasło</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>{{ session['auth']['username'] }}</td>
+						<td>{{ session['auth']['address'] }}</td>
+						<td>{{ session['auth']['email'] }}</td>
+						<td>{{ session['auth']['login'] }}</td>
+						<td>(takie jak podano)</td>
+					</tr>
+				</tbody>
+			</table>
+			<button type="button" class="btn btn-success" style="float: right;"><a href="{{ url_for('index_blueprint.index') }}" style="color: white;">Dalej</a></button>
+		</div>
+		{% endif %}
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %} Profil użytkownika {% endblock %}
+{% block content %}
+
+    <div class="jumbotron" style="margin-top:3%;">
+        {% if not user['owner']: %}
+        <h3>Profil użytkownika - {{ user['name'] }}: </h3>
+        {% else: %}
+        <h3>{{ session['auth']['username'] | split_space }}, to twój profil:</h3>
+        {% endif %}
+        <table class="table">
+            <tbody>
+                <tr>
+                    <th>Imię i nazwisko: </th>
+                    <td>{{ user['name'] }}</td>
+                </tr>
+                <tr>
+                    <th>Adres: </th>
+                    <td>{{ user['address'] }}</td>
+                </tr>
+                <tr>
+                    <th>E-mail: </th>
+                    <td>{{ user['email'] }}</td>
+                </tr>
+                <tr>
+                    <th>Liczba wypożyczonych książek: </th>
+                    <td>{{ user['book_count'] }}</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+{% endblock %}

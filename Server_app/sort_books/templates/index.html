@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %} Strona główna {% endblock %}
+{% block content %}
+
+	{% if log: %}
+		<div class="alert alert-success alert-dismissable">
+			<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+  			<strong>Sukces!</strong> Zalogowano pomyślnie.
+		</div>
+	{% endif %}
+
+	<div class="jumbotron">
+    	<h2>Witaj na stronie projektu <i>Sort_Books</i>;</h2>
+    	<p>Na tej stronie będziesz mógł:
+        	<ul>
+        		<li>Zobaczyć twoje wypożyczone książki</li>
+        		<li>Sprawdzić dostępność książek w bilbiotece</li>
+        		<li>Obejrzeć swoje statystyki</li>
+        		<li>Oceniać i polecać książki</li>
+        	</ul>
+        	{% if not 'auth' in session %}
+        	<a href="{{ url_for('login_blueprint.auth_in') }}">Zaloguj się</a> aby w pełni korzysać z zalet naszej strony!</p>
+        	{% endif %}
+	</div>
+
+{% endblock %}
