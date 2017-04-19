@@ -29,14 +29,16 @@
           <ul>
             <a href="{{ url_for('index_blueprint.index') }}"><li>Strona główna</li></a>
             <a href="{{ url_for('index_blueprint.galery') }}"><li>Galeria</li></a>
-            <a href="{{ url_for('index_blueprint.contact') }}"><li>Kontakt</li></a>
             <a href="{{ url_for('book_blueprint.avalibe') }}"><li>Zbiór</li></a>
+            <a href="{{ url_for('rank_blueprint.rank') }}"><li>Ranking</li></a>
+            <a href="{{ url_for('index_blueprint.contact') }}"><li>Kontakt</li></a>
             {% if 'auth' in session %}
             <div class="user">
               <li class="drop">{{ session['auth']['username'] | split_space }}
               <span class="caret"></span></li>
               <ul class="user-menu">
                 <a href="{{ url_for('acc_blueprint.profile', user_id = session['auth']['id']) }}"><li>Profil</li></a>
+                <a href="{{ url_for('mybook_blueprint.books') }}"><li>Moje książki</li></a>
                 <a href="{{ url_for('acc_blueprint.settings') }}"><li>Ustawienia</li></a>
                 <a href="{{ url_for('login_blueprint.auth_out') }}"><li>Wyloguj</li></a>
               </ul>
@@ -77,8 +79,9 @@
             <ul>
               <a href="{{ url_for('index_blueprint.index') }}"><li>Strona główna</li></a>
               <a href="{{ url_for('index_blueprint.galery') }}"><li>Galeria</li></a>
-              <a href="{{ url_for('index_blueprint.contact') }}"><li>Kontakt</li></a>
               <a href="{{ url_for('book_blueprint.avalibe') }}"><li>Zbiór</li></a>
+              <a href="{{ url_for('rank_blueprint.rank') }}"><li>Ranking</li></a>
+              <a href="{{ url_for('index_blueprint.contact') }}"><li>Kontakt</li></a>
             </ul>
 
           </div>

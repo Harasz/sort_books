@@ -1,6 +1,7 @@
 from flask import render_template, Blueprint, session, redirect, url_for, request
+from sort_books import cur, login_required
 from hashlib import sha512
-from sort_books import cur
+
 
 login_blueprint = Blueprint('login_blueprint', __name__)
 
@@ -31,27 +32,26 @@ def auth_in():
 
 
 @login_blueprint.route('/logout')
+@login_required
 def auth_out():
-	if 'auth' in session:
-		session.pop('auth', None)
-		return redirect(url_for('login_blueprint.auth_in'))
-	elif not 'auth' in session:
-		return redirect(url_for('index_blueprint.index'))
+	session.pop('auth', None)
+	return redirect(url_for('login_blueprint.auth_in'))
 
 @login_blueprint.route('/acc/adjust',  methods=['POST', 'GET'])
+@login_required
 def auth_adjust():
-	if 'auth' in session and session['auth']['adj']:
+	if session['auth']['adj']:
 		if request.method == 'POST':
 			if 'email' in request.form:
 				if request.form['email'] == request.form['email2']:
-					cur.execute("UPDATE librarians.readers SET email='%s' WHERE id_r='%s';" % (request.form['email'], session['auth']['id']))
+					cur.execute("UPDATE librarians.readers SET email=%s WHERE id_r=%s;", (request.form['email'], session['auth']['id']))
 					session['auth']['email'] = request.form['email']
 					return render_template('adj.html', step=2)
 				else:
 					return render_template('adj.html', step=1, error="Podane adresy email nie są identyczne")
 			elif 'pass' in request.form:
 				if request.form['pass'] == request.form['pass2']:
-					cur.execute("UPDATE librarians.readers SET pass='%s' WHERE id_r='%s';" % (sha512(request.form['pass'].encode('UTF-8')).hexdigest(), session['auth']['id']))
+					cur.execute("UPDATE librarians.readers SET pass=%s WHERE id_r=%s;", (sha512(request.form['pass'].encode('UTF-8')).hexdigest(), session['auth']['id']))
 					return render_template('adj.html', step=3)
 				else:
 					return render_template('adj.html', step=2, error="Podane hasła nie są identyczne")
@@ -63,8 +63,8 @@ def auth_adjust():
 				if request.form.getlist('allow_profile'): allow_profile = 'true'
 				else: allow_profile = 'false'
 				
-				cur.execute("INSERT INTO librarians.readers_pref VALUES ('%s', '%s', '%s', '%s');" % (session['auth']['id'], allow_email, allow_address, allow_profile))
-				cur.execute("UPDATE librarians.readers SET loged=true WHERE id_r='%s';" % (session['auth']['id']))
+				cur.execute("INSERT INTO librarians.readers_pref VALUES (%s, %s, %s, %s);", (session['auth']['id'], allow_email, allow_address, allow_profile))
+				cur.execute("UPDATE librarians.readers SET loged=true WHERE id_r=%s;", (session['auth']['id'], ))
 				return render_template('adj.html', step=4)
 		else:
 			return render_template('adj.html', step=1)
@@ -73,5 +73,5 @@ def auth_adjust():
 
 
 def auth(login, pas):
-	cur.execute("SELECT * FROM librarians.readers WHERE login='%s' AND pass='%s';" % (login, pas))
+	cur.execute("SELECT * FROM librarians.readers WHERE login=%s OR email=%s AND pass=%s;", (login, login, pas))
 	return cur.fetchone()

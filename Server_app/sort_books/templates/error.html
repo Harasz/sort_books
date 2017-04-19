@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %} Błąd {{ logs[0] }} {% endblock %}
+{% block content %}
+
+	<div class="jumbotron">
+    	<h2>Błąd {{ logs[0] }} {{ logs[1] }}</h2>
+    	<p> {{ logs[2] }} <br><br>
+        Przejdź do <a href="{{ url_for('index_blueprint.index') }}">strony głównej</a>.</p>
+	</div>
+
+{% endblock %}

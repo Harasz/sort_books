@@ -41,7 +41,7 @@ parser.add_argument('book_id', type=int)
 parser.add_argument('name_id', type=int)
 
 
-class Sort_Books_webApi(Resource):
+class Sort_Books_appLogin(Resource):
 			
 	def post(self):
 		data = parser.parse_args()
@@ -49,7 +49,7 @@ class Sort_Books_webApi(Resource):
 		
 		try:
 			pass_ = sha512(data['pass_'].encode('UTF-8')).hexdigest()
-			cur.execute("SELECT * FROM librarians.user WHERE email='%s' AND haslo='%s';" % (data['login'], pass_))
+			cur.execute("SELECT * FROM librarians.user WHERE email=%s AND haslo=%s;", (data['login'].lower(), pass_))
 			resp = cur.fetchall()
 			if resp:
 				cache = ''.join(random.sample('qwertyuiopasdfghjklzxcvbnm1234567890', 15))
@@ -60,24 +60,23 @@ class Sort_Books_webApi(Resource):
 		except:
 			return {'status': 'blad'}, 500
 
+
 class Sort_Books_addRe(Resource):
 			
 	def post(self):
 		data = parser.parse_args()
 		global auth_k
-		#if not data['key'] in auth_k:
-		#	return {'status': 'brak autoryzacji'}, 401
+		if not data['key'] in auth_k:
+			return {'status': 'brak autoryzacji'}, 401
 
 		try:
-			cur.execute("SELECT * FROM librarians.readers WHERE name='%s' AND addres='%s';" % (data['arg1'], data['arg2']))
+			cur.execute("SELECT * FROM librarians.readers WHERE name=%s AND addres=%s;", (data['arg1'], data['arg2']))
 			resp = cur.fetchall()
 			if resp:
 				return {'status': 'istnieje'}, 507
 			else:
-				cur.execute("SELECT * FROM librarians.readers")
-				resp = cur.fetchall()
 				password = ''.join(random.sample('qwertyuiopasdfghjklzxcvbnm1234567890', 8))
-				cur.execute("INSERT INTO librarians.readers VALUES ("+str(len(resp))+", '%s', '%s', 'null', '%s', 'false', '%s');" % (data['arg1'], data['arg2'], sha512(password.encode('UTF-8')).hexdigest(), data['login']))
+				cur.execute("INSERT INTO librarians.readers VALUES (default ,%s, %s, 'null', %s, 'false', %s);", (data['arg1'], data['arg2'], sha512(password.encode('UTF-8')).hexdigest(), data['login']))
 				return {'status': 'dodano', 'login': data['arg1'], 'haslo': password}, 201
 		except:
 			return {'status': 'blad'}, 500
@@ -93,19 +92,18 @@ class Sort_Books_addBook(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT * FROM librarians.books WHERE title='%s' AND author='%s';" % (data['arg1'], data['arg2']))
+			cur.execute("SELECT * FROM librarians.books WHERE title=%s AND author=%s;", (data['arg1'], data['arg2']))
 			resp = cur.fetchone()
 			if resp:
-				cur.execute("UPDATE librarians.books SET count='%s' WHERE id_b='%s';" % (data['book_id']+resp[3], resp[0]))
+				cur.execute("UPDATE librarians.books SET count=%s WHERE id_b=%s;", (data['book_id']+resp[3], resp[0]))
 				return {'status': 'istnieje/dodano'}, 507
 			else:
-				cur.execute("SELECT * FROM librarians.books")
-				resp = cur.fetchall()
-				cur.execute("INSERT INTO librarians.books VALUES ( "+str(len(resp))+", '"+data['arg1']+"', '"+data['arg2']+"');")
+				cur.execute("INSERT INTO librarians.books (title, author, count) VALUES (%s, %s, %s);", (data['arg1'], data['arg2'], data['book_id']))
 				return {'status': 'dodano'}, 201
 		except:
 			return {'status': 'blad'}, 500
-		
+
+
 class Sort_Books_getReaders(Resource):
 	
 	def post(self):
@@ -116,7 +114,7 @@ class Sort_Books_getReaders(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT * FROM librarians.readers WHERE id_r>0 ORDER BY id_r ASC;")
+			cur.execute("SELECT * FROM librarians.readers ORDER BY id_r ASC;")
 			resp = cur.fetchall()
 			if resp:
 				ret = {}
@@ -127,6 +125,7 @@ class Sort_Books_getReaders(Resource):
 				return {'status': 'brak danych'}, 204
 		except:
 			return {'status': 'blad'}, 500
+
 
 class Sort_Books_getBooks(Resource):
 			
@@ -138,7 +137,7 @@ class Sort_Books_getBooks(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT * FROM librarians.books WHERE id_b>0 ORDER BY id_b ASC;")
+			cur.execute("SELECT * FROM librarians.books ORDER BY id_b ASC;")
 			resp = cur.fetchall()
 			if resp:
 				ret = {}
@@ -149,7 +148,7 @@ class Sort_Books_getBooks(Resource):
 				return {'status': 'brak danych'}, 204
 		except:
 			return {'status': 'blad'}, 500
-			
+
 
 class Sort_Books_getBorrows(Resource):
 			
@@ -161,7 +160,13 @@ class Sort_Books_getBorrows(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT rented, name_id, book_id, give_back, id_br FROM librarians.borrows WHERE id_br>0;")
+			cur.execute("""
+			SELECT bor.rented, re.name, bo.title, bor.give_back, bor.id_br
+			FROM librarians.borrows AS bor, librarians.books AS bo, librarians.readers AS re
+			WHERE bor.name_id=re.id_r AND bor.book_id=bo.id_b
+			ORDER BY bor.id_br ASC;
+			""")
+			
 			resp = cur.fetchall()
 			if resp:
 				ret = {}
@@ -174,8 +179,6 @@ class Sort_Books_getBorrows(Resource):
 			return {'status': 'blad'}, 500
 
 
-
-
 class Sort_Books_addBorrow(Resource):
 			
 	def post(self):
@@ -186,15 +189,15 @@ class Sort_Books_addBorrow(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT give_back FROM librarians.borrows WHERE name_id='%s' AND book_id='%s' AND give_back='0';" % (data['name_id'], data['book_id']))
+			cur.execute("SELECT give_back FROM librarians.borrows WHERE name_id=%s AND book_id=%s AND give_back='0';", (data['name_id'], data['book_id']))
 			resp = cur.fetchall()
 			if resp:
 				return {'status': 'istnieje'}, 507
 			else:
-				cur.execute("SELECT * FROM librarians.borrows")
-				resp = cur.fetchall()
-				cur.execute("INSERT INTO librarians.borrows VALUES ("+str(len(resp)+1)+", '%s', '%s', '%s', '%s', '0');" % (data['arg1'], data['arg2'], data['name_id'], data['book_id']))
-				cur.execute("UPDATE librarians.books SET count=count-1 WHERE id_b='%s';" % (data['book_id']))
+				cur.execute("""
+				INSERT INTO librarians.borrows VALUES (default, %s, %s, %s, %s, '0');
+				UPDATE librarians.books SET count=count-1 WHERE id_b=%s;
+				""", (data['arg1'], data['arg2'], data['name_id'], data['book_id'], data['book_id']))
 				return {'status': 'dodano'}, 201
 		except:
 			return {'status': 'blad'}, 500
@@ -210,21 +213,21 @@ class Sort_Books_retBook(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			cur.execute("SELECT * FROM librarians.borrows WHERE id_br='%s' AND give_back='1';" % (data['arg1']))
+			cur.execute("SELECT * FROM librarians.borrows WHERE id_br=%s AND give_back='1';", (data['arg1'], ))
 			resp = cur.fetchone()
 			if resp:
 				return {'status': 'istnieje'}, 507
 			else:
-				cur.execute("SELECT * FROM librarians.borrows WHERE id_br='%s' AND give_back='0';" % (data['arg1']))
-				resp = cur.fetchone()
-				cur.execute("UPDATE librarians.books SET count=count+1 WHERE id_b='%s';" % (resp[4]))
-				cur.execute("UPDATE librarians.borrows SET give_back='1' WHERE id_br='%s';" % (data['arg1']))
+				cur.execute("""
+				UPDATE librarians.books SET count=count+1 WHERE id_b=(SELECT book_id FROM librarians.borrows WHERE id_br=%s AND give_back='0');
+				UPDATE librarians.borrows SET return=%s, give_back='1' WHERE id_br=%s;
+				""", (data['arg1'], datetime.datetime.now().strftime("%Y-%m-%d"), data['arg1']))
 				return {'status': 'dodano'}, 201
 		except:
 			return {'status': 'blad'}, 500
 
 
-api.add_resource(Sort_Books_webApi, '/api/logaction')
+api.add_resource(Sort_Books_appLogin, '/api/logaction')
 api.add_resource(Sort_Books_addRe, '/api/addre')
 api.add_resource(Sort_Books_addBook, '/api/addbook')
 api.add_resource(Sort_Books_getReaders, '/api/getreader')
@@ -233,9 +236,11 @@ api.add_resource(Sort_Books_addBorrow, '/api/borrow')
 api.add_resource(Sort_Books_getBorrows, '/api/getborrow')
 api.add_resource(Sort_Books_retBook, '/api/retbook')
 
+
 if __name__ == '__main__':
-	
+
 	auth_k = []
+
 	with psycopg2.connect(dbname='librarians', user='postgres', host='192.168.0.108', password='dsp2017') as conn:
 		try:
 			conn.autocommit = True

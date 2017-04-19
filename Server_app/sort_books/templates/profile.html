@@ -23,8 +23,12 @@
                     <td>{{ user['email'] }}</td>
                 </tr>
                 <tr>
-                    <th>Liczba wypożyczonych książek: </th>
+                    <th>Liczba przeczytanych książek: </th>
                     <td>{{ user['book_count'] }}</td>
+                </tr>
+                <tr>
+                    <th>Tytuły przeczytanych książek: </th>
+                    <td> {% for book in books: %} <a href="/book/id/{{ book[0] }}">{{ book[1] }}</a>,  {% endfor %}</td>
                 </tr>
             </tbody>
         </table>
