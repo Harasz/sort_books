@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %} Informacje o {{ book[1] }} {% endblock %}
+{% block content %}
+
+	<div class="jumbotron" style="min-height: 600px;">
+    	<h2>{{book[1]}} <sub> ({{book[0]}})</sub></h2>
+        <div class="row">
+            <div class="col-sm-6">
+                {% if book[4]: %}
+                    <img src="/static/images/book_avatar/{{book[4]}}">
+                {% else: %}
+                    <img src="/static/images/book_avatar/null.png">
+                {% endif %}
+            </div>
+            <div class="col-sm-6">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Tytuł</th>
+                            <td>{{ book[1] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Autor</th>
+                            <td>{{ book[2] }}</td>
+                        </tr>
+                        <tr>
+                            <th>Stan</th>
+                            <td>{{ item }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
+        <h3>Oceny książki</h3>
+        {% if allow_com: %}
+        <form method="post" class="add-com">
+            <p style="font-size: 14px;">Pamiętaj, że każdy komentarz musi być wcześniej zaakceptowany.</p>
+            <textarea rows="2" name="comment"></textarea>
+            <input type="submit" value="Dodaj">
+        </form>
+        {% endif %}
+        <div class="comments">
+            {% for comment in comments: %}
+            <div class="comment">
+                <div class="row">
+                    <p class="caption col-sm-8">{{ comment[4] }}</p>
+                    <p class="com col-sm-4" style="text-align: right;">{{ comment[3] }}</p>
+                </div>
+                <p class="com">{{ comment[2] }}</p>
+            </div>
+            {% endfor %}
+        </div>
+	</div>
+
+{% endblock %}

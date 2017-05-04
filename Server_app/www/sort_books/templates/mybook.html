@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %} Moje książki {% endblock %}
+{% block content %}
+
+	<div class="jumbotron" style="min-height: 600px;">
+    	<h2>Historia twoich wypożyczeń</h2>
+        <p>Poniżej znajduje się tabela z książkami, które u nas wypożyczyłeś.</p>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Tytuł</th>
+                    <th>Dzień wypożyczenia</th>
+                    <th>Dzień oddania</th>
+                    <th>Oceń</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in bor: %}
+                <tr>
+                    <td>{{ i[0] }}</td>
+                    <td>{{ i[1] }}</td>
+                    {% if i[4]: %}
+                    <td>{{ i[2] }}</td>
+                    <td><a href="/book/id/{{ i[3] }}">Oceń</a></td>
+                    {% else: %}
+                    <td>Nie oddano</td>
+                    <td> - </td>
+                    {% endif %}
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+	</div>
+
+{% endblock %}

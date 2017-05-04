@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %} Galeria zdjęć {% endblock %}
+{% block content %}
+
+	<div class="jumbotron" style="min-height: 600px;">
+    	<h2>Galeria zdjęć</h2>
+        <p>Tutaj są zdjęcia z naszych prac oraz projektów.</p>
+
+        <div class="galery">
+            {% for i in image: %}
+                <img src="{{i}}">
+            {% endfor %}
+        </div>
+	</div>
+
+    <script type="text/javascript">
+        $('.galery img').click(function() {
+            $('.active').removeClass('active')
+            $(this).addClass('active')
+        })
+    </script>
+
+{% endblock %}
