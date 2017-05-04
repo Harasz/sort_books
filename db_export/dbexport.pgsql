@@ -125,7 +125,8 @@ CREATE TABLE comments (
     id_b integer NOT NULL,
     comment text NOT NULL,
     date date NOT NULL,
-    r_name text NOT NULL
+    r_name text NOT NULL,
+    accept boolean
 );
 
 
@@ -282,9 +283,10 @@ ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regcl
 COPY books (id_b, title, author, count, avatar) FROM stdin;
 2	Dziady	Adam Mickiewicz	60	\N
 3	Lalka	Bolesław Prus	16	\N
-4	Wesele	Stanisław Wyspiański	1	\N
 5	Ferdydurke	Witold Gombrowicz	12	\N
-1	Pan Tadeusz	Adam Mickiewicz	33	\N
+4	Wesele	Stanisław Wyspiański	2	\N
+1	Pan Tadeusz	Adam Mickiewicz	34	\N
+7	Harry Potter i Kamień Filozoficzny	J.K. Rowling	10	\N
 \.
 
 
@@ -292,7 +294,7 @@ COPY books (id_b, title, author, count, avatar) FROM stdin;
 -- Name: books_id_b_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('books_id_b_seq', 6, true);
+SELECT pg_catalog.setval('books_id_b_seq', 7, true);
 
 
 --
@@ -310,8 +312,6 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 8	2017-05-01	2017-04-01	4	2	f
 9	2017-05-01	2017-04-01	5	1	f
 10	2017-05-01	2017-04-01	3	3	t
-11	2017-05-02	2017-04-02	6	4	f
-12	2017-05-02	2017-04-02	3	1	f
 13	2017-05-13	2017-04-13	3	4	f
 15	2017-05-13	2017-04-13	4	4	f
 16	2017-05-13	2017-04-13	2	4	f
@@ -320,6 +320,9 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 18	2017-04-17	2017-04-13	1	5	t
 20	2017-04-18	2017-04-18	2	1	t
 21	2017-04-18	2017-04-18	1	1	t
+11	2017-05-02	2017-04-02	6	4	t
+12	2017-05-02	2017-04-02	3	1	t
+22	2017-05-04	2017-05-04	9	7	t
 \.
 
 
@@ -327,14 +330,16 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 -- Name: borrows_id_br_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('borrows_id_br_seq', 21, true);
+SELECT pg_catalog.setval('borrows_id_br_seq', 22, true);
 
 
 --
 -- Data for Name: comments; Type: TABLE DATA; Schema: librarians; Owner: postgres
 --
 
-COPY comments (id_comment, id_b, comment, date, r_name) FROM stdin;
+COPY comments (id_comment, id_b, comment, date, r_name, accept) FROM stdin;
+0	2	polecam każdemu <3	2017-04-20	Eryk Wincenty	\N
+1	1	Super książka polecam!	2017-05-03	Jan Kowalski	t
 \.
 
 
@@ -342,7 +347,7 @@ COPY comments (id_comment, id_b, comment, date, r_name) FROM stdin;
 -- Name: comments_id_comment_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('comments_id_comment_seq', 1, false);
+SELECT pg_catalog.setval('comments_id_comment_seq', 1, true);
 
 
 --
@@ -351,11 +356,13 @@ SELECT pg_catalog.setval('comments_id_comment_seq', 1, false);
 
 COPY readers (id_r, name, addres, email, pass, loged, login) FROM stdin;
 4	Eryk Wincenty	Katowice, ul. Ogrodowa 10	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test4
-5	Bogumiła Wypch	Katowice, ul. Ogrodowa 23	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test5
 2	Adam Kowalski	Katowice, ul. Ogrodowa 3	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test2
 1	Jan Kowalski	Katowice, ul. Ogrodowa 2	jan@jan.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test1
 3	Janina Kowalska	Katowice, ul. Ogrodowa 2	asd@ads.pl	d404559f602eab6fd602ac7680dacbfaadd13630335e951f097af3900e9de176b6db28512f2e000b9d04fba5133e8b1c6e8df59db3a8ab9d60be4b97cc9e81db	t	test3
 6	Adam Niedbalski	Katowice, Ogrdowa 126	brak	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	f	test6
+5	Bogumiła Wypch	Katowice, ul. Ogrodowa 20	test@test.pl	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	test5
+8	Jakub Kiepka	Gliwice, ul. Ogrodowa 2	null	c7ac587b56b7e33f681fedb8bab3bb1a41b5fe744e39a3f6705dab83bf37a118287c57862f54c826dc149eabdb7857cd5cc6d6171be2254b4d8b45aee5180f8c	f	JaKie692
+9	Olek Olewski	Gliwice, ul. Gliwicka 22	Olek@gmail.com	3c9909afec25354d551dae21590bb26e38d53f2173b8d3dc3eee4c047e7ab1c1eb8b85103e3be7ba613b31bb5c9c36214dc9f14a42fd7a2fdb84856bca5c44c2	t	OlOle735
 \.
 
 
@@ -363,7 +370,7 @@ COPY readers (id_r, name, addres, email, pass, loged, login) FROM stdin;
 -- Name: readers_id_r_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('readers_id_r_seq', 7, true);
+SELECT pg_catalog.setval('readers_id_r_seq', 9, true);
 
 
 --
@@ -376,6 +383,7 @@ COPY readers_pref (reader_id, allow_email, allow_address, allow_profile) FROM st
 4	f	f	f
 5	t	f	t
 1	f	t	t
+9	t	f	t
 \.
 
 
