@@ -7,12 +7,15 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from lib.editReader import Ui_Dialog
 
 
 class Sort_books(object):
 
-    def setupUi_2(self, MainWindow, Config):
+    def setupUi_2(self, MainWindow, Config, Sec):
         self.Config = Config
+        self.Sec = Sec
+        self.Window = MainWindow
         MainWindow.setObjectName("MainWindow")
         MainWindow.setWindowModality(QtCore.Qt.ApplicationModal)
         MainWindow.setEnabled(True)
@@ -29,20 +32,6 @@ class Sort_books(object):
         MainWindow.setMouseTracking(False)
         MainWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
         MainWindow.setAutoFillBackground(True)
-        MainWindow.setStyleSheet("QPushButton\n"
-"{\n"
-"    background-color: rgb(0, 170, 255);\n"
-"    border: none;\n"
-"    border-left: 2px solid grey;\n"
-"    color: white;\n"
-"}\n"
-"\n"
-"QPushButton:hover:!pressed\n"
-"{\n"
-"    background-color: grey;\n"
-"    border: none;\n"
-"    border-left: 2px solid rgb(0, 170, 255);\n"
-"}")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -139,11 +128,6 @@ class Sort_books(object):
         self.pushButton_7.setStyleSheet("")
         self.pushButton_7.setObjectName("pushButton_7")
         self.verticalLayout_3.addWidget(self.pushButton_7)
-        self.line_4 = QtWidgets.QFrame(self.verticalLayoutWidget_3)
-        self.line_4.setFrameShape(QtWidgets.QFrame.HLine)
-        self.line_4.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.line_4.setObjectName("line_4")
-        self.verticalLayout_3.addWidget(self.line_4)
         self.line = QtWidgets.QFrame(self.centralwidget)
         self.line.setGeometry(QtCore.QRect(210, -20, 20, 391))
         self.line.setFrameShape(QtWidgets.QFrame.VLine)
@@ -162,13 +146,21 @@ class Sort_books(object):
         self.widget.setObjectName("widget")
         self.gridLayout.addWidget(self.groupBox, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
+
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 719, 21))
         self.menubar.setObjectName("menubar")
+        self.menuWebsite = QtWidgets.QMenu(self.menubar)
+        self.menuWebsite.setObjectName("menuWebsite")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.actionComm = QtWidgets.QAction(MainWindow)
+        self.actionComm.setObjectName("actionComm")
+        self.menuWebsite.addAction(self.actionComm)
+        self.menuWebsite.addSeparator()
+        self.menubar.addAction(self.menuWebsite.menuAction())
 
         self.add_widget()
 
@@ -180,6 +172,7 @@ class Sort_books(object):
         self.pushButton_5.clicked.connect(lambda: self.update_(self.Widgets['return_']['Ui']))
         self.pushButton_6.clicked.connect(lambda: self.update_(self.Widgets['addbo']['Ui']))
         self.pushButton_7.clicked.connect(lambda: self.update_(self.Widgets['addre']['Ui']))
+        self.actionComm.triggered.connect(lambda: self.update_(self.Widgets['comments']['Ui']))
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -190,13 +183,6 @@ class Sort_books(object):
         MainWindow.setTabOrder(self.pushButton_5, self.pushButton_6)
         MainWindow.setTabOrder(self.pushButton_6, self.pushButton_7)
 
-        self.gridLayout.addWidget(self.Widgets['addre']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['addbo']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['addbor']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['readView']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['bookView']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['borrowView']['Widget'], 0, 0, 1, 1)
-        self.gridLayout.addWidget(self.Widgets['return_']['Widget'], 0, 0, 1, 1)
 
     def retranslateUi_2(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -209,6 +195,8 @@ class Sort_books(object):
         self.pushButton_6.setText(_translate("MainWindow", "Dodaj książkę"))
         self.pushButton_7.setText(_translate("MainWindow", "Dodaj czytelnika"))
         self.groupBox.setTitle(_translate("MainWindow", "Sort Books"))
+        self.menuWebsite.setTitle(_translate("MainWindow", "Strona"))
+        self.actionComm.setText(_translate("MainWindow", "Komentarze"))
 
 
     def update_(self, to_update):
@@ -220,18 +208,21 @@ class Sort_books(object):
 
         self.Widgets = {}
 
-        modules_name = ('addre', 'addbo', 'addbor','readView', 'bookView', 'borrowView', 'return_')
+        modules_name = ('addre', 'addbo', 'addbor','readView', 'bookView', 'borrowView', 'return_', 'comments')
         modules = []
 
         for modul in modules_name:
-            modules.append(__import__(modul))
+            modules.append(__import__('lib.'+modul, None, None, [None], 0))
 
         for widget in range(len(modules)):
             self.Widgets[modules_name[widget]] = {}
             self.Widgets[modules_name[widget]]['Widget'] = QtWidgets.QWidget()
             self.Widgets[modules_name[widget]]['Ui'] = modules[widget].Ui_Form()
-            self.Widgets[modules_name[widget]]['Ui'].setupUi(self.Widgets[modules_name[widget]]['Widget'], self.Config)
+            self.Widgets[modules_name[widget]]['Ui'].setupUi(self.Widgets[modules_name[widget]]['Widget'],
+                                                             self.Config, self.Sec)
+            self.gridLayout.addWidget(self.Widgets[modules_name[widget]]['Widget'], 0, 0, 0, 0)
             self.Widgets[modules_name[widget]]['Widget'].hide()
+
 
     def clearWidget(self):
         for i in range(self.gridLayout.count() - 1, -1, -1):

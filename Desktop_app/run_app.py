@@ -5,6 +5,7 @@ from login import Login_form
 from window import Sort_books
 from error import app_error
 from serverConfig import ServerConfig
+from secure import Secure
 
 
 class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
@@ -17,6 +18,7 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
         self.window = window
 
         self.Config = ServerConfig()
+        self.Sec = Secure()
 
         self.dialog.show()
 
@@ -24,29 +26,54 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
     def loginAction(self):
         login = self.lineEdit.text()
         pass_ = self.lineEdit_2.text()
+        self.get_key()
 
         if login is '' or pass_ is '':
             return app_error("Uzupełnij wszystkie dane.")
 
         try:
-            resp = requests.post(self.Config.get_server()+'/api/logaction', data={'login': login, 'pass_': pass_})
+            resp = requests.post(self.Config.get_server()+'/api/logaction',
+                                 data={'login': self.Sec.encrypt_(login),
+                                       'pass_': self.Sec.encrypt_(pass_),
+                                       'publicKey': self.Sec.get_public()})
         except requests.ConnectionError:
             return app_error("Nie można nawiązać połączenia z serwerem.")
 
         if resp.status_code == 200:
-            self.data = json.loads(resp.text)
-            open('.cache', "w").write(self.data['auth'])
+            data = json.loads(resp.text)
+            try:
+                open('.cache', "wb").write(data['auth'].encode())
+            except PermissionError:
+                os.remove('.cache')
+                open('.cache', "wb").write(data['auth'].encode())
             ctypes.windll.kernel32.SetFileAttributesW('.cache', 0x02)
             self.dialog.close()
             return self.st_ap()
         else:
-            return app_error("Dane użyte do logowania są niepoprawne")
+            return app_error("Dane użyte do logowania są niepoprawne.")
 
 
     def st_ap(self):
-        self.setupUi_2(self.window, self.Config)
+        self.setupUi_2(self.window, self.Config, self.Sec)
         self.retranslateUi_2(self.window)
         return self.window.show()
+
+    def get_key(self, stop=False):
+        try:
+            resp = requests.get(self.Config.get_server()+'/api/key')
+        except requests.ConnectionError:
+            app_error("Nie można nawiązać połączenia z serwerem.")
+            return exit()
+
+        if resp.status_code == 200:
+            data = json.loads(resp.text)
+            self.Sec.load_other_key(data['publicKey'])
+        else:
+            if stop:
+                return exit()
+            else:
+                app_error("Wystąpił problem z wczytaniem kluczy")
+            return self.get_key(stop=True)
 
 
 if '__main__' == __name__:

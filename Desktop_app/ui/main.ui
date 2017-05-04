@@ -360,8 +360,21 @@ QPushButton:hover:!pressed
      <height>21</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menuAplikacja">
+    <property name="title">
+     <string>Aplikacja</string>
+    </property>
+    <addaction name="actionJedynka"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menuAplikacja"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionJedynka">
+   <property name="text">
+    <string>Jedynka</string>
+   </property>
+  </action>
  </widget>
  <tabstops>
   <tabstop>pushButton_2</tabstop>
