@@ -20,7 +20,7 @@ class Ui_Form(object):
         Form.setObjectName("Form")
         Form.resize(444, 373)
         self.formLayoutWidget = QtWidgets.QWidget(Form)
-        self.formLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 602, 381))
+        self.formLayoutWidget.setGeometry(QtCore.QRect(-1, -1, 600, 380))
         self.formLayoutWidget.setObjectName("formLayoutWidget")
         self.formLayout = QtWidgets.QFormLayout(self.formLayoutWidget)
         self.formLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.ExpandingFieldsGrow)
@@ -30,18 +30,18 @@ class Ui_Form(object):
         self.formLayout.setContentsMargins(5, 5, 5, 5)
         self.formLayout.setObjectName("formLayout")
         self.treeView = QtWidgets.QTreeView(self.formLayoutWidget)
-        self.treeView.setMinimumSize(QtCore.QSize(440, 300))
+        self.treeView.setMinimumSize(QtCore.QSize(435, 275))
         self.treeView.setObjectName("treeView")
         self.itemModel = QtGui.QStandardItemModel(0, 4)
         self.treeView.setModel(self.itemModel)
         self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         self.treeView.setColumnWidth(0, 150)
         self.itemModel.setHeaderData(0, QtCore.Qt.Horizontal, 'Czytelnik')
-        self.treeView.setColumnWidth(1, 190)
+        self.treeView.setColumnWidth(1, 160)
         self.itemModel.setHeaderData(1, QtCore.Qt.Horizontal, 'Komentarz')
         self.treeView.setColumnWidth(2, 60)
         self.itemModel.setHeaderData(2, QtCore.Qt.Horizontal, 'Akceptuj')
-        self.treeView.setColumnWidth(3, 50)
+        self.treeView.setColumnWidth(3, 60)
         self.itemModel.setHeaderData(3, QtCore.Qt.Horizontal, 'Odrzuć')
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.treeView)
         self.label = QtWidgets.QLabel(self.formLayoutWidget)
@@ -91,6 +91,7 @@ class Ui_Form(object):
             self.label_2.setText("Brak komentarzy.")
             return False
 
+
         data = self.Sec.encode_data(json.loads(resp.text))
         button = []
         for key, value in data.items():
@@ -107,6 +108,13 @@ class Ui_Form(object):
 
 
     def acceptCom(self, na, ac):
+        if ac == "False":
+            sure = QtWidgets.QMessageBox.question(self.Form, "Usuwanie komentarza",
+                                                  "Czy na pewno chcesz usunąć ten komentarz?",
+                                                  QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+            if sure == QtWidgets.QMessageBox.No:
+                return False
+
         try:
             resp = requests.post(self.Config.get_server()+'/api/acceptcom',
                                  data={'arg1': self.Sec.encrypt_(na),

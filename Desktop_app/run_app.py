@@ -48,13 +48,13 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
                 open('.cache', "wb").write(data['auth'].encode())
             ctypes.windll.kernel32.SetFileAttributesW('.cache', 0x02)
             self.dialog.close()
-            return self.st_ap()
+            return self.st_ap(self.Sec.decrypt_(data['master']))
         else:
             return app_error("Dane użyte do logowania są niepoprawne.")
 
 
-    def st_ap(self):
-        self.setupUi_2(self.window, self.Config, self.Sec)
+    def st_ap(self, data):
+        self.setupUi_2(self.window, self.Config, self.Sec, data)
         self.retranslateUi_2(self.window)
         return self.window.show()
 

@@ -11,14 +11,13 @@ def check_con(resp):
     return False
 
 
-def app_error(text, conn=False, e=None):
+def app_error(text, conn=False):
     error = QtWidgets.QMessageBox()
     error.setIcon(QtWidgets.QMessageBox.Warning)
     error.setText(text)
     error.setWindowTitle("Błąd!")
     error.setStandardButtons(QtWidgets.QMessageBox.Ok)
     if conn:
-        error.setDetailedText("Aby ponownie uzyskać autoryzację ze strony serwera zrestartuj aplikację.\nW razie dalszych problemów skontaktuj się z administratorem.")
-    else:
-        error.setDetailedText(e)
+        error.setDetailedText("Aby ponownie uzyskać autoryzację ze strony serwera zrestartuj aplikację.\n"
+                              "W razie dalszych problemów skontaktuj się z administratorem.")
     return error.exec_()

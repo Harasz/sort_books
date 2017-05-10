@@ -47,17 +47,17 @@ class Ui_Form(object):
         self.pushButton.setGeometry(QtCore.QRect(310, 20, 61, 21))
         self.pushButton.setObjectName("pushButton")
         self.treeView = QtWidgets.QTreeView(Form)
-        self.treeView.setGeometry(QtCore.QRect(30, 50, 410, 180))
+        self.treeView.setGeometry(QtCore.QRect(30, 50, 400, 170))
         self.treeView.setObjectName("treeView")
         self.treeView.setSortingEnabled(True)
         self.itemModel = QtGui.QStandardItemModel(0, 3)
         self.treeView.setModel(self.itemModel)
         self.treeView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        self.treeView.setColumnWidth(0, 150)
+        self.treeView.setColumnWidth(0, 160)
         self.itemModel.setHeaderData(0, QtCore.Qt.Horizontal, 'Imie i nazwisko')
-        self.treeView.setColumnWidth(1, 200)
+        self.treeView.setColumnWidth(1, 175)
         self.itemModel.setHeaderData(1, QtCore.Qt.Horizontal, 'Adres')
-        self.treeView.setColumnWidth(2, 50)
+        self.treeView.setColumnWidth(2, 40)
         self.itemModel.setHeaderData(2, QtCore.Qt.Horizontal, 'Edytuj')
 
         self.formLayoutWidget_2 = QtWidgets.QWidget(Form)
@@ -99,6 +99,7 @@ class Ui_Form(object):
         self.Sec = Sec
 
         self.lineEdit.textChanged['QString'].connect(self.search)
+        self.pushButton.clicked.connect(self.get_list)
         self.pushButton_2.clicked.connect(self.doEdit)
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -106,7 +107,7 @@ class Ui_Form(object):
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.label_2.setText(_translate("Form", "Szukaj: "))
-        self.pushButton.setText(_translate("Form", "Szukaj"))
+        self.pushButton.setText(_translate("Form", "Odśwież"))
         self.label_3.setText(_translate("Form", "Imię:"))
         self.label_4.setText(_translate("Form", "Nazwisko:"))
         self.label_5.setText(_translate("Form", "Miasto"))
@@ -143,23 +144,15 @@ class Ui_Form(object):
     def edRead(self, na):
         self.na = na
 
-        try:
-            resp = requests.post(self.Config.get_server() + '/api/userinfo',
-                                 data={'key': open('.cache', 'r').read(),
-                                       'arg1': self.Sec.encrypt_(str(na))})
-            if check_con(resp):
-                    return False
-        except:
-            return app_error("Wystąpił błąd podczas pobierania informacji.")
+        index = [y for x, y in self.data.items() if y[0] == na][0]
 
-        data = self.Sec.encode_data(json.loads(resp.text))
-        data['data'][1] = data['data'][1].split(' ')
-        data['data'][2] = data['data'][2].split(', ')
+        name = index[1].split(' ')
+        address = index[2].split(', ')
 
-        self.lineEdit_2.setText(data['data'][1][0])
-        self.lineEdit_3.setText(data['data'][1][1])
-        self.lineEdit_4.setText(data['data'][2][0])
-        self.lineEdit_5.setText(data['data'][2][1])
+        self.lineEdit_2.setText(name[0])
+        self.lineEdit_3.setText(name[1])
+        self.lineEdit_4.setText(address[0])
+        self.lineEdit_5.setText(address[1])
         return self.formLayoutWidget_2.show()
 
     def doEdit(self):

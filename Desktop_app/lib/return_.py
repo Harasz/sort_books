@@ -16,7 +16,6 @@ import json
 class Ui_Form(object):
 
     data = None
-    button = []
 
     def setupUi(self, Form, Config, Sec):
         self.Form = Form
@@ -65,18 +64,21 @@ class Ui_Form(object):
         self.Sec = Sec
 
         self.lineEdit.textChanged['QString'].connect(self.search)
-        self.retranslateUi(Form)
+        self.pushButton.clicked.connect(self.get_list)
+        self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(Form)
 
-    def retranslateUi(self, Form):
+
+    def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
-        Form.setWindowTitle(_translate("Form", "Form"))
         self.label_2.setText(_translate("Form", "Szukaj: "))
-        self.pushButton.setText(_translate("Form", "Szukaj"))
+        self.pushButton.setText(_translate("Form", "Odśwież"))
+
 
     def show_(self):
         self.get_list()
         return self.Form.show()
+
 
     def get_list(self):
         self.clear_row()
@@ -94,18 +96,19 @@ class Ui_Form(object):
             self.label.setText("Brak wypożyczeń.")
             return False
 
-        self.data = self.Sec.encode_data(json.loads(resp.text))
-        self.button = []
+        data = self.Sec.encode_data(json.loads(resp.text))
+        self.data = [y for x, y in data.items() if y[3] == 'False']
+        button = []
         i = 0
-        for key, value in self.data.items():
-            if value[3] == 'False':
-                self.button.append(QtWidgets.QPushButton("Zwróć"))
-                self.button[i].clicked.connect(partial(self.retBook, na=value[4]))
-                self.itemModel.setItem(i, 0, QtGui.QStandardItem(value[1]))
-                self.itemModel.setItem(i, 1, QtGui.QStandardItem(value[2]))
-                self.itemModel.setItem(i, 2, QtGui.QStandardItem(value[0]))
-                self.treeView.setIndexWidget(self.itemModel.index(i, 3), self.button[i])
-                i += 1
+        for value in self.data:
+            button.append(QtWidgets.QPushButton("Zwróć"))
+            button[i].clicked.connect(partial(self.retBook, na=value[4]))
+            self.itemModel.setItem(i, 0, QtGui.QStandardItem(value[1]))
+            self.itemModel.setItem(i, 1, QtGui.QStandardItem(value[2]))
+            self.itemModel.setItem(i, 2, QtGui.QStandardItem(value[0]))
+            self.treeView.setIndexWidget(self.itemModel.index(i, 3), button[i])
+            i += 1
+
 
     def retBook(self, na):
         try:
@@ -127,17 +130,24 @@ class Ui_Form(object):
 
         return self.get_list()
 
+
     def search(self):
-        cache = self.lineEdit.text()
+        cache = self.lineEdit.text().upper()
         self.clear_row()
         i = 0
-        for key, value in self.data.items():
-            if value[3]=='False' and (cache.upper() in value[1].upper() or cache.upper() in value[2].upper() or cache.upper() in value[0].upper() or cache.upper() in ''):
-                self.button[i].clicked.connect(partial(self.retBook, na=value[4]))
+        button = []
+        for value in self.data:
+            if not value[1].upper().find(cache) == -1 \
+               or not value[2].upper().find(cache) == -1 \
+               or not value[0].upper().find(cache) == -1:
+                button.append(QtWidgets.QPushButton("Zwróć"))
+                button[i].clicked.connect(partial(self.retBook, na=value[4]))
                 self.itemModel.setItem(i, 0, QtGui.QStandardItem(value[1]))
                 self.itemModel.setItem(i, 1, QtGui.QStandardItem(value[2]))
                 self.itemModel.setItem(i, 2, QtGui.QStandardItem(value[0]))
+                self.treeView.setIndexWidget(self.itemModel.index(i, 3), button[i])
                 i += 1
+
 
     def clear_row(self):
         for i in range(self.itemModel.rowCount()):

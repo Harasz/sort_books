@@ -65,6 +65,7 @@ class Ui_Form(object):
         self.Sec = Sec
 
         self.lineEdit.textChanged['QString'].connect(self.search)
+        self.pushButton.clicked.connect(self.get_list)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -72,7 +73,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.label_2.setText(_translate("Form", "Szukaj: "))
-        self.pushButton.setText(_translate("Form", "Szukaj"))
+        self.pushButton.setText(_translate("Form", "Odśwież"))
 
     def show_(self):
         self.get_list()
@@ -104,7 +105,9 @@ class Ui_Form(object):
         self.clear_row()
         i = 0
         for key, value in self.data.items():
-            if not value[1].upper().find(cache) or not value[2].upper().find(cache) or not value[0].upper().find(cache):
+            if not value[1].upper().find(cache) == -1 \
+               or not value[2].upper().find(cache) == -1 \
+               or not value[0].upper().find(cache) == -1:
                 self.itemModel.setItem(i, 0, QtGui.QStandardItem(value[1]))
                 self.itemModel.setItem(i, 1, QtGui.QStandardItem(value[2]))
                 self.itemModel.setItem(i, 2, QtGui.QStandardItem(value[0]))

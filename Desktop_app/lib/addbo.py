@@ -7,11 +7,15 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import requests
 from error import app_error, check_con
+import requests
+import cv2
+import numpy
 
 
 class Ui_Form(object):
+
+    cover = None
 
     def setupUi(self, Form, Config, Sec):
         self.Form = Form
@@ -53,9 +57,11 @@ class Ui_Form(object):
         self.lineEdit_3 = QtWidgets.QLineEdit(self.formLayoutWidget)
         self.lineEdit_3.setObjectName("lineEdit_3")
         self.formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.lineEdit_3)
+        self.pushButton_2 = QtWidgets.QPushButton(self.formLayoutWidget)
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, self.pushButton_2)
         self.label_3 = QtWidgets.QLabel(Form)
         self.label_3.setGeometry(QtCore.QRect(26, 162, 221, 61))
-        self.label_3.setText("")
         self.label_3.setObjectName("label_3")
         self.pushButton = QtWidgets.QPushButton(Form)
         self.pushButton.setGeometry(QtCore.QRect(264, 162, 91, 41))
@@ -69,6 +75,7 @@ class Ui_Form(object):
         self.Sec = Sec
 
         self.pushButton.clicked.connect(self.add_book)
+        self.pushButton_2.clicked.connect(self.get_cover)
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
 
@@ -80,8 +87,10 @@ class Ui_Form(object):
         self.label_2.setText(_translate("Form", "Tytuł: "))
         self.label_4.setText(_translate("Form", "Ilość: "))
         self.pushButton.setText(_translate("Form", "Dodaj"))
+        self.pushButton_2.setText(_translate("Form", "Ustaw okładkę"))
 
     def show_(self):
+        self.cover = None
         return self.Form.show()
 
     def add_book(self):
@@ -93,14 +102,22 @@ class Ui_Form(object):
             return app_error("Uzupełnij wszystkie dane.")
 
         try:
+            if self.cover is not None:
+                files = {'cover': self.cover}
+            else:
+                files = {}
+
             resp = requests.post(self.Config.get_server()+'/api/addbook',
                                  data={'arg1': self.Sec.encrypt_(title),
                                        'arg2': self.Sec.encrypt_(author),
-                                       'book_id': self.Sec.encrypt_(count),
-                                       'key': open('.cache', 'r').read()})
+                                       'arg3': self.Sec.encrypt_(count),
+                                       'key': open('.cache', 'r').read()},
+                                 files=files)
             check_con(resp)
-        except:
+        except Exception:
             return app_error("Wystąpił błąd przy dodawaniu.")
+
+        self.cover = None
 
         if 507 == resp.status_code:
             self.clear_line()
@@ -113,6 +130,16 @@ class Ui_Form(object):
         else:
             self.label_3.setStyleSheet("color: red;")
             return self.label_3.setText("Nieznany błąd.")
+
+
+    def get_cover(self):
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self.Form, "Wybierz okładkę dla ksiązki",
+                                                            "",
+                                                            "Pliki graficzne (*.png *.jpg *.jpeg *.gif)"
+                                                            )
+        if fileName:
+            self.cover = open(fileName, 'rb')
+
 
     def clear_line(self):
         self.lineEdit.clear()

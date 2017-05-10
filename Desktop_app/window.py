@@ -7,12 +7,13 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from lib.editReader import Ui_Dialog
 
 
 class Sort_books(object):
 
-    def setupUi_2(self, MainWindow, Config, Sec):
+    cover = None
+
+    def setupUi_2(self, MainWindow, Config, Sec, data):
         self.Config = Config
         self.Sec = Sec
         self.Window = MainWindow
@@ -152,15 +153,25 @@ class Sort_books(object):
         self.menubar.setObjectName("menubar")
         self.menuWebsite = QtWidgets.QMenu(self.menubar)
         self.menuWebsite.setObjectName("menuWebsite")
+        self.menuLibrarians = QtWidgets.QMenu(self.menubar)
+        self.menuLibrarians.setObjectName("menuLibrarians")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.actionComm = QtWidgets.QAction(MainWindow)
         self.actionComm.setObjectName("actionComm")
+        self.actionLibrarians = QtWidgets.QAction(MainWindow)
+        self.actionLibrarians.setObjectName("actionLibrarians")
+        if data.decode() == 'True':
+            self.menuLibrarians.addAction(self.actionLibrarians)
+        self.passLibrarians = QtWidgets.QAction(MainWindow)
+        self.passLibrarians.setObjectName("passLibrarians")
+        self.menuLibrarians.addAction(self.passLibrarians)
         self.menuWebsite.addAction(self.actionComm)
         self.menuWebsite.addSeparator()
         self.menubar.addAction(self.menuWebsite.menuAction())
+        self.menubar.addAction(self.menuLibrarians.menuAction())
 
         self.add_widget()
 
@@ -173,6 +184,8 @@ class Sort_books(object):
         self.pushButton_6.clicked.connect(lambda: self.update_(self.Widgets['addbo']['Ui']))
         self.pushButton_7.clicked.connect(lambda: self.update_(self.Widgets['addre']['Ui']))
         self.actionComm.triggered.connect(lambda: self.update_(self.Widgets['comments']['Ui']))
+        self.actionLibrarians.triggered.connect(lambda: self.update_(self.Widgets['librarians']['Ui']))
+        self.passLibrarians.triggered.connect(lambda: self.update_(self.Widgets['pass']['Ui']))
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -196,7 +209,10 @@ class Sort_books(object):
         self.pushButton_7.setText(_translate("MainWindow", "Dodaj czytelnika"))
         self.groupBox.setTitle(_translate("MainWindow", "Sort Books"))
         self.menuWebsite.setTitle(_translate("MainWindow", "Strona"))
+        self.menuLibrarians.setTitle(_translate("MainWindow", "Biblioteka"))
         self.actionComm.setText(_translate("MainWindow", "Komentarze"))
+        self.actionLibrarians.setText(_translate("MainWindow", "Konta"))
+        self.passLibrarians.setText(_translate("MainWindow", "Zmień hasło"))
 
 
     def update_(self, to_update):
@@ -208,7 +224,8 @@ class Sort_books(object):
 
         self.Widgets = {}
 
-        modules_name = ('addre', 'addbo', 'addbor','readView', 'bookView', 'borrowView', 'return_', 'comments')
+        modules_name = ('addre', 'addbo', 'addbor', 'readView', 'bookView',
+                        'borrowView', 'return_', 'comments', 'librarians', 'pass')
         modules = []
 
         for modul in modules_name:
@@ -216,11 +233,14 @@ class Sort_books(object):
 
         for widget in range(len(modules)):
             self.Widgets[modules_name[widget]] = {}
-            self.Widgets[modules_name[widget]]['Widget'] = QtWidgets.QWidget()
+            if widget < 8:
+                self.Widgets[modules_name[widget]]['Widget'] = QtWidgets.QWidget(self.Window)
+                self.gridLayout.addWidget(self.Widgets[modules_name[widget]]['Widget'], 0, 0, 0, 0)
+            else:
+                self.Widgets[modules_name[widget]]['Widget'] = QtWidgets.QDialog(self.Window)
             self.Widgets[modules_name[widget]]['Ui'] = modules[widget].Ui_Form()
             self.Widgets[modules_name[widget]]['Ui'].setupUi(self.Widgets[modules_name[widget]]['Widget'],
                                                              self.Config, self.Sec)
-            self.gridLayout.addWidget(self.Widgets[modules_name[widget]]['Widget'], 0, 0, 0, 0)
             self.Widgets[modules_name[widget]]['Widget'].hide()
 
 
