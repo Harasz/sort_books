@@ -44,6 +44,8 @@ class Secure(object):
 			if value is not None:
 				if key == 'publicKey':
 					data[key] = data[key].encode()
+				elif key == 'cover':
+					continue
 				else:
 					data[key] = self.decrypt_(value).decode()
 		return data

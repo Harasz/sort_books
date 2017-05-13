@@ -6,8 +6,8 @@
     	<h2>{{book[1]}} <sub> ({{book[0]}})</sub></h2>
         <div class="row">
             <div class="col-sm-6">
-                {% if book[4]: %}
-                    <img src="/static/images/book_avatar/{{book[4]}}">
+                {% if image: %}
+                    <img src="{{ image }}">
                 {% else: %}
                     <img src="/static/images/book_avatar/null.png">
                 {% endif %}

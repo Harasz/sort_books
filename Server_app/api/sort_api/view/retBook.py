@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource
-from sort_api import cur, auth_k, parser, Sec
+from sort_api import cur, login_required, parser, Sec
 import datetime
 
 
@@ -10,7 +10,7 @@ class API_retBook(Resource):
 		
 		data = Sec.encode_data(parser.parse_args())	
 		
-		if not data['key'] in auth_k:
+		if not login_required(data):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
@@ -24,5 +24,5 @@ class API_retBook(Resource):
 				UPDATE librarians.borrows SET return=%s, give_back='1' WHERE id_br=%s;
 				""", (data['arg1'], datetime.datetime.now().strftime("%Y-%m-%d"), data['arg1']))
 				return {'status': 'dodano'}, 201
-		except Exception as e:
-			return {'status': Sec.encrypt_(e, open('pem/'+data['key']+'.pem', 'rb').read())}, 500
+		except Exception:
+			return {'status': 'wystapil blad'}, 500

@@ -7,6 +7,9 @@
 # WARNING! All changes made in this file will be lost!
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from error import check_con, app_error
+import requests
+import json
 
 
 class Sort_books(object):
@@ -155,6 +158,8 @@ class Sort_books(object):
         self.menuWebsite.setObjectName("menuWebsite")
         self.menuLibrarians = QtWidgets.QMenu(self.menubar)
         self.menuLibrarians.setObjectName("menuLibrarians")
+        self.menuAbout = QtWidgets.QMenu(self.menubar)
+        self.menuAbout.setObjectName("menuAbout")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -163,15 +168,25 @@ class Sort_books(object):
         self.actionComm.setObjectName("actionComm")
         self.actionLibrarians = QtWidgets.QAction(MainWindow)
         self.actionLibrarians.setObjectName("actionLibrarians")
-        if data.decode() == 'True':
-            self.menuLibrarians.addAction(self.actionLibrarians)
         self.passLibrarians = QtWidgets.QAction(MainWindow)
         self.passLibrarians.setObjectName("passLibrarians")
         self.menuLibrarians.addAction(self.passLibrarians)
+        self.infoLibrarians = QtWidgets.QAction(MainWindow)
+        self.infoLibrarians.setObjectName("infoLibrarians")
+        self.menuLibrarians.addAction(self.infoLibrarians)
+        self.aboutLibrarians = QtWidgets.QAction(MainWindow)
+        self.aboutLibrarians.setObjectName("aboutLibrarians")
+        self.menuAbout.addAction(self.aboutLibrarians)
+        self.addLibrarians = QtWidgets.QAction(MainWindow)
+        self.addLibrarians.setObjectName("addLibrarians")
+        if data.decode() == 'True':
+            self.menuLibrarians.addAction(self.actionLibrarians)
+            self.menuLibrarians.addAction(self.addLibrarians)
         self.menuWebsite.addAction(self.actionComm)
         self.menuWebsite.addSeparator()
         self.menubar.addAction(self.menuWebsite.menuAction())
         self.menubar.addAction(self.menuLibrarians.menuAction())
+        self.menubar.addAction(self.menuAbout.menuAction())
 
         self.add_widget()
 
@@ -186,6 +201,9 @@ class Sort_books(object):
         self.actionComm.triggered.connect(lambda: self.update_(self.Widgets['comments']['Ui']))
         self.actionLibrarians.triggered.connect(lambda: self.update_(self.Widgets['librarians']['Ui']))
         self.passLibrarians.triggered.connect(lambda: self.update_(self.Widgets['pass']['Ui']))
+        self.addLibrarians.triggered.connect(lambda: self.update_(self.Widgets['addLib']['Ui']))
+        self.aboutLibrarians.triggered.connect(lambda: self.update_(self.Widgets['about']['Ui']))
+        self.infoLibrarians.triggered.connect(self.userInfo)
 
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -213,6 +231,10 @@ class Sort_books(object):
         self.actionComm.setText(_translate("MainWindow", "Komentarze"))
         self.actionLibrarians.setText(_translate("MainWindow", "Konta"))
         self.passLibrarians.setText(_translate("MainWindow", "Zmień hasło"))
+        self.infoLibrarians.setText(_translate("MainWindow", "Moje konto"))
+        self.addLibrarians.setText(_translate("MainWindow", "Dodaj konto"))
+        self.menuAbout.setTitle(_translate("MainWindow", "Projekt"))
+        self.aboutLibrarians.setText(_translate("MainWindow", "O projekcie"))
 
 
     def update_(self, to_update):
@@ -224,8 +246,8 @@ class Sort_books(object):
 
         self.Widgets = {}
 
-        modules_name = ('addre', 'addbo', 'addbor', 'readView', 'bookView',
-                        'borrowView', 'return_', 'comments', 'librarians', 'pass')
+        modules_name = ('addre', 'addbo', 'addbor', 'readView', 'bookView', 'borrowView',
+                        'return_', 'comments', 'addLib', 'librarians', 'pass', 'about')
         modules = []
 
         for modul in modules_name:
@@ -233,7 +255,7 @@ class Sort_books(object):
 
         for widget in range(len(modules)):
             self.Widgets[modules_name[widget]] = {}
-            if widget < 8:
+            if widget < 9:
                 self.Widgets[modules_name[widget]]['Widget'] = QtWidgets.QWidget(self.Window)
                 self.gridLayout.addWidget(self.Widgets[modules_name[widget]]['Widget'], 0, 0, 0, 0)
             else:
@@ -249,3 +271,31 @@ class Sort_books(object):
             widget = self.gridLayout.itemAt(i).widget()
             if widget.objectName() != 'groupBox':
                 widget.hide()
+
+
+    def userInfo(self):
+
+        try:
+            resp = requests.post(self.Config.get_server()+'/api/librariansinfo',
+                                 data={'key': open('.cache', 'r').read()})
+            if check_con(resp):
+                return False
+        except:
+            return app_error("Wystąpił błąd podczas pobierania informacji.")
+
+        data = self.Sec.encode_data(json.loads(resp.text))['data']
+
+        master = ""
+        if data[3] == 'True':
+            master = "Jesteś zarządcą\n"
+
+
+        info = QtWidgets.QMessageBox()
+        info.setIcon(QtWidgets.QMessageBox.Information)
+        info.setText("Informacje o twoim koncie:\n\n"
+                     "Imię: "+data[0]+"\n"
+                     "Nazwisko: "+data[1]+"\n"
+                     "E-mial: "+data[2]+"\n"+master)
+        info.setWindowTitle("Twoje konto - Sort Books")
+        info.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        return info.exec_()

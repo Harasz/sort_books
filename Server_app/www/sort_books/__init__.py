@@ -24,6 +24,7 @@
 
 from flask import Flask, session, redirect, url_for
 from random import sample
+from configparser import ConfigParser
 import psycopg2
 from functools import wraps
 
@@ -31,9 +32,18 @@ app = Flask(__name__)
 app.secret_key = ''.join(sample('qwertyuiopasdfgjhklzxcvbnm1234567890', 10))
 
 
-conn = psycopg2.connect(dbname='librarians', user='postgres', host='192.168.0.103', password='dsp2017')
-conn.autocommit = True
-cur = conn.cursor()
+conf = ConfigParser()
+conf.read(filenames='./server.cfg')
+
+try:
+	conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],
+							user=conf['SERVER_SQL']['User'],
+							host=conf['SERVER_SQL']['Address'],
+							password=conf['SERVER_SQL']['Password'])
+	conn.autocommit = True
+	cur = conn.cursor()
+except Exception as e:
+	print_error("Wystapił bład z bazą danych:\n"+str(e))
 
 def login_required(func):
 	@wraps(func)

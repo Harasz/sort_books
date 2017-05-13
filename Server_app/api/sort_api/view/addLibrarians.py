@@ -5,7 +5,7 @@ from hashlib import sha512
 import random
 
 
-class API_addRe(Resource):
+class API_addLibrarians(Resource):
 			
 	def post(self):
 		
@@ -15,14 +15,21 @@ class API_addRe(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 
 		try:
-			cur.execute("SELECT * FROM librarians.readers WHERE name=%s AND addres=%s;", (data['arg1'], data['arg2']))
+			name = data['arg1'].split('/')
+			cur.execute("SELECT * FROM librarians.user WHERE imie=%s AND nazwisko=%s AND email=%s;",
+						(name[0], name[1], data['arg2']))
 			resp = cur.fetchall()
 			if resp:
 				return {'status': 'istnieje'}, 507
 			else:
+				if data['arg3'] == 'True': data['arg3']='1'
+				else: data['arg3']='0'
+			
 				password = ''.join(random.sample('qwertyuiopasdfghjklzxcvbnm1234567890', 8))
-				cur.execute("INSERT INTO librarians.readers VALUES (default ,%s, %s, 'null', %s, 'false', %s);", (data['arg1'], data['arg2'], sha512(password.encode('UTF-8')).hexdigest(), data['login']))
+				cur.execute("INSERT INTO librarians.user VALUES (default, %s, %s, %s, %s, %s);",
+							(name[0], name[1], data['arg2'],
+							sha512(password.encode('UTF-8')).hexdigest(), data['arg3']))
 				pub = open('pem/'+data['key']+'.pem', 'rb').read()
-				return {'status': 'dodano', 'login': Sec.encrypt_(data['arg1'], pub), 'haslo': Sec.encrypt_(password, pub)}, 201
+				return {'status': 'dodano', 'data': Sec.encrypt_(password, pub)}, 201
 		except Exception:
 			return {'status': 'wystapil blad'}, 500

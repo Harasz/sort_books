@@ -4,7 +4,6 @@ from sort_api import cur, login_required, parser, Sec
 from werkzeug import secure_filename
 import os
 
-
 allow = set(['png', 'jpg', 'jpeg', 'gif'])
 
 def check_ext(f):
@@ -13,15 +12,15 @@ def check_ext(f):
 		f.rsplit('.', 1)[1] in allow
 
 
-class API_addBook(Resource):
-			
-	def post(self):
-		
-		data = Sec.encode_data(parser.parse_args())
-		
+class API_bookEdit(Resource):
+
+	def post(self, data):
+
+		data = Sec.encode_data(parser.parse_args())	
+
 		if not login_required(data):
 			return {'status': 'brak autoryzacji'}, 401
-		
+
 		try:
 			if request.files['cover'] and check_ext(request.files['cover']):
 				f = request.files['cover']
@@ -29,16 +28,11 @@ class API_addBook(Resource):
 				f.save(
 						os.path.join('sort_api/image/'+cover+'.'+f.filename.split('.')[1])
 					  )
-		
-			cur.execute("SELECT * FROM librarians.books WHERE title=%s AND author=%s;", (data['arg1'], data['arg2']))
-			resp = cur.fetchone()
-			if resp:
-				cur.execute("UPDATE librarians.books SET count=%s WHERE id_b=%s;", (int(data['arg3'])+resp[3], resp[0]))
-				return {'status': 'istnieje/dodano'}, 507
-			else:
-				cur.execute("""INSERT INTO librarians.books
-								VALUES (default, %s, %s, %s);""",
-								(data['arg1'], data['arg2'], data['arg3']))
-				return {'status': 'dodano'}, 201
+			
+			cur.execute("""UPDATE librarians.books
+							SET title=%s, author=%s, count=%s 
+							WHERE id_b=%s;""", (data['arg1'], data['arg2'], data['arg3'], data['book_id'] ))
+							
+			return {'status': 'zmieniono'}, 200
 		except Exception:
 			return {'status': 'wystapil blad'}, 500

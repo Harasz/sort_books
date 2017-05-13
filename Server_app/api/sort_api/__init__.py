@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_restful import Resource, Api, reqparse
 from configparser import ConfigParser
+from functools import wraps
 import psycopg2
 import secure
 
@@ -25,6 +26,7 @@ try:
 except Exception as e:
 	print_error(e)
 
+
 try:
 	conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],
 							user=conf['SERVER_SQL']['User'],
@@ -34,3 +36,9 @@ try:
 	cur = conn.cursor()
 except Exception as e:
 	print_error(e)
+
+
+def login_required(data):
+		if data['key'] in [x[0] for x in auth_k]:
+			return True
+		return False

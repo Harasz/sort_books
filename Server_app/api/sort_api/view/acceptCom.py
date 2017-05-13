@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_restful import Resource
-from sort_api import cur, auth_k, parser, Sec
+from sort_api import cur, login_required, parser, Sec
 
 
 class API_acceptCom(Resource):
@@ -9,7 +9,7 @@ class API_acceptCom(Resource):
 		
 		data = Sec.encode_data(parser.parse_args())	
 		
-		if not data['key'] in auth_k:
+		if not login_required(data):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
@@ -19,5 +19,5 @@ class API_acceptCom(Resource):
 			else:
 				cur.execute("DELETE FROM librarians.comments WHERE id_comment=%s;", (data['arg1'], ))
 				return {'status': 'usunieto'}, 200
-		except Exception as e:
-			return {'status': Sec.encrypt_(e, open('pem/'+data['key']+'.pem', 'rb').read())}, 500
+		except Exception:
+			return {'status': 'wystapil blad'}, 500

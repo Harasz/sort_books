@@ -51,8 +51,7 @@ CREATE TABLE books (
     id_b integer NOT NULL,
     title text NOT NULL,
     author text NOT NULL,
-    count integer NOT NULL,
-    avatar text
+    count integer NOT NULL
 );
 
 
@@ -214,7 +213,8 @@ CREATE TABLE "user" (
     imie text NOT NULL,
     nazwisko text NOT NULL,
     email text NOT NULL,
-    haslo text NOT NULL
+    haslo text NOT NULL,
+    master boolean
 );
 
 
@@ -280,13 +280,13 @@ ALTER TABLE ONLY "user" ALTER COLUMN id SET DEFAULT nextval('user_id_seq'::regcl
 -- Data for Name: books; Type: TABLE DATA; Schema: librarians; Owner: postgres
 --
 
-COPY books (id_b, title, author, count, avatar) FROM stdin;
-2	Dziady	Adam Mickiewicz	60	\N
-3	Lalka	Bolesław Prus	16	\N
-5	Ferdydurke	Witold Gombrowicz	12	\N
-4	Wesele	Stanisław Wyspiański	2	\N
-1	Pan Tadeusz	Adam Mickiewicz	34	\N
-7	Harry Potter i Kamień Filozoficzny	J.K. Rowling	10	\N
+COPY books (id_b, title, author, count) FROM stdin;
+3	Lalka	Bolesław Prus	16
+5	Ferdydurke	Witold Gombrowicz	12
+2	Dziady	Adam Mickiewicz	40
+7	Harry Potter i Kamień Filozoficzny	J.K. Rowling	15
+1	Pan Tadeusz	Adam Mickiewicz	35
+4	Wesele	Stanisław Wyspiański	3
 \.
 
 
@@ -294,7 +294,7 @@ COPY books (id_b, title, author, count, avatar) FROM stdin;
 -- Name: books_id_b_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('books_id_b_seq', 7, true);
+SELECT pg_catalog.setval('books_id_b_seq', 8, true);
 
 
 --
@@ -312,7 +312,6 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 8	2017-05-01	2017-04-01	4	2	f
 9	2017-05-01	2017-04-01	5	1	f
 10	2017-05-01	2017-04-01	3	3	t
-13	2017-05-13	2017-04-13	3	4	f
 15	2017-05-13	2017-04-13	4	4	f
 16	2017-05-13	2017-04-13	2	4	f
 17	2017-05-13	2017-04-13	1	5	t
@@ -323,6 +322,7 @@ COPY borrows (id_br, return, rented, name_id, book_id, give_back) FROM stdin;
 11	2017-05-02	2017-04-02	6	4	t
 12	2017-05-02	2017-04-02	3	1	t
 22	2017-05-04	2017-05-04	9	7	t
+13	2017-05-09	2017-04-13	3	4	t
 \.
 
 
@@ -391,8 +391,9 @@ COPY readers_pref (reader_id, allow_email, allow_address, allow_profile) FROM st
 -- Data for Name: user; Type: TABLE DATA; Schema: librarians; Owner: postgres
 --
 
-COPY "user" (id, imie, nazwisko, email, haslo) FROM stdin;
-1	Jakub	Jakub	hi@jakub.ovh	c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec
+COPY "user" (id, imie, nazwisko, email, haslo, master) FROM stdin;
+0	Jakub	Sydor	hi@jakub.ovh	c7ad44cbad762a5da0a452f9e854fdc1e0e7a52a38015f23f3eab1d80b931dd472634dfac71cd34ebc35d16ab7fb8a90c81f975113d6c7538dc69dd8de9077ec	t
+3	Grażyna	Kowal	grazyna@kowal.pl	343adb962355c1fc1453d4e24ed16380aa08500a2797f659aeeb71b8484649256c8d62de68eb57da856dca444e60abbf8adbd1d74df185fbd57452f666452e2c	f
 \.
 
 
@@ -400,7 +401,7 @@ COPY "user" (id, imie, nazwisko, email, haslo) FROM stdin;
 -- Name: user_id_seq; Type: SEQUENCE SET; Schema: librarians; Owner: postgres
 --
 
-SELECT pg_catalog.setval('user_id_seq', 2, true);
+SELECT pg_catalog.setval('user_id_seq', 4, true);
 
 
 --

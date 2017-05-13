@@ -9,5 +9,5 @@ class API_publicKey(Resource):
 		
 		try:
 			return {'publicKey': Sec.get_public()}, 200
-		except:
-			return {'status': 'blad'}, 500
+		except Exception:
+			return {'status': 'wystapil blad'}, 500
