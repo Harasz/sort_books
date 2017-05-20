@@ -129,8 +129,8 @@ class Ui_Form(object):
                                  data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                  return False
-        except:
-            return app_error("Wystąpił błąd przy pobieraniu danych.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy pobieraniu danych.", e)
 
         self.data = self.Sec.encode_data(json.loads(resp.text))
         self.button = []
@@ -178,8 +178,8 @@ class Ui_Form(object):
                                        'book_id': self.Sec.encrypt_(self.na)},
                                  files=files)
             check_con(resp)
-        except:
-            return app_error("Wystąpił błąd przy edytowaniu.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy edytowaniu.", e)
 
         self.cover = None
 

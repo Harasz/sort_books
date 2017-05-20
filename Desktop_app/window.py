@@ -16,7 +16,7 @@ class Sort_books(object):
 
     cover = None
 
-    def setupUi_2(self, MainWindow, Config, Sec, data):
+    def setupUi_2(self, MainWindow, Config, Sec, data, date):
         self.Config = Config
         self.Sec = Sec
         self.Window = MainWindow
@@ -214,6 +214,9 @@ class Sort_books(object):
         MainWindow.setTabOrder(self.pushButton_5, self.pushButton_6)
         MainWindow.setTabOrder(self.pushButton_6, self.pushButton_7)
 
+        if date:
+            self.needPass()
+
 
     def retranslateUi_2(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -280,8 +283,8 @@ class Sort_books(object):
                                  data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                 return False
-        except:
-            return app_error("Wystąpił błąd podczas pobierania informacji.")
+        except Exception as e:
+            return app_error("Wystąpił błąd podczas pobierania informacji.", e)
 
         data = self.Sec.encode_data(json.loads(resp.text))['data']
 
@@ -289,13 +292,19 @@ class Sort_books(object):
         if data[3] == 'True':
             master = "Jesteś zarządcą\n"
 
+        text = "Informacje o twoim koncie:\n\nImię: "+data[0]+"\nNazwisko: "+data[1]+"\nE-mial: "+data[2]+"\n"+master
+        return self.infoBox(text, "Informacje o koncie - Sort Books")
 
+
+    def needPass(self):
+        self.infoBox("Od ostatniej zmiany hasła minął ponad miesiąc. Ze względów bezpieczeństwa zalecamy je zmienić.",
+                     "Zmien hasło - Sort Books")
+        return self.update_(self.Widgets['pass']['Ui'])
+
+    def infoBox(self, text, title):
         info = QtWidgets.QMessageBox()
         info.setIcon(QtWidgets.QMessageBox.Information)
-        info.setText("Informacje o twoim koncie:\n\n"
-                     "Imię: "+data[0]+"\n"
-                     "Nazwisko: "+data[1]+"\n"
-                     "E-mial: "+data[2]+"\n"+master)
-        info.setWindowTitle("Twoje konto - Sort Books")
+        info.setText(text)
+        info.setWindowTitle(title)
         info.setStandardButtons(QtWidgets.QMessageBox.Ok)
         return info.exec_()

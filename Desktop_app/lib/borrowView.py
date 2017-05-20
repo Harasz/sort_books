@@ -87,10 +87,11 @@ class Ui_Form(object):
                                  data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                  return False
-        except:
-            return app_error("Wystąpił błąd przy pobieraniu danych.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy pobieraniu danych.", e)
 
         self.data = self.Sec.encode_data(json.loads(resp.text))
+
         for key, value in self.data.items():
             self.itemModel.setItem(int(key), 0, QtGui.QStandardItem(value[1]))
             self.itemModel.setItem(int(key), 1, QtGui.QStandardItem(value[2]))

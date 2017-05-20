@@ -83,8 +83,8 @@ class Ui_Form(object):
             resp = requests.post(self.Config.get_server()+'/api/getcomm', data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                  return False
-        except:
-            return app_error("Wystąpił błąd przy pobieraniu danych.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy pobieraniu danych.", e)
 
         if resp.status_code == 204:
             self.label_2.setStyleSheet("color: green;")
@@ -121,7 +121,7 @@ class Ui_Form(object):
                                        'arg2': self.Sec.encrypt_(ac),
                                        'key': open('.cache', 'r').read()})
             check_con(resp)
-        except:
+        except Exception as e:
             self.label_2.setStyleSheet("color: red;")
             self.label_2.setText("Wystąpił błąd.")
             return self.get_list()

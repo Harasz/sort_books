@@ -124,8 +124,8 @@ class Ui_Form(object):
             resp = requests.post(self.Config.get_server()+'/api/getreader',
                                  data={'key': open('.cache', 'r').read()})
             check_con(resp)
-        except:
-            return app_error("Wystapił problem przy pobieraniu danych.")
+        except Exception as e:
+            return app_error("Wystapił problem przy pobieraniu danych.", e)
 
         data = self.Sec.encode_data(json.loads(resp.text))
         self.list_1 = {}
@@ -141,8 +141,8 @@ class Ui_Form(object):
             resp = requests.post(self.Config.get_server()+'/api/getbook',
                                  data={'key': open('.cache', 'r').read()})
             check_con(resp)
-        except:
-            return app_error("Wystąpił błąd przy pobieraniu danych")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy pobieraniu danych", e)
 
         data = self.Sec.encode_data(json.loads(resp.text))
         self.list_2 = {}
@@ -168,16 +168,16 @@ class Ui_Form(object):
         if date_1 > date_2:
             return app_error("Dats wypożyczenia nie może być większa niż data zwrotu")
 
-        #try:
-        resp = requests.post(self.Config.get_server()+'/api/borrow',
+        try:
+            resp = requests.post(self.Config.get_server()+'/api/borrow',
                                  data={'key': open('.cache', 'r').read(),
                                        'arg1': self.Sec.encrypt_(date_2.strftime("%d-%m-%y")),
                                        'arg2': self.Sec.encrypt_(date_1.strftime("%d-%m-%y")),
                                        'name_id': self.Sec.encrypt_(self.list_1[reader]),
                                        'book_id': self.Sec.encrypt_(self.list_2[book])})
-        check_con(resp)
-        #except:
-         #   return app_error("Wystąpił błąd przy dodawaniu")
+            check_con(resp)
+        except Exception as e:
+            return app_error("Wystąpił błąd przy dodawaniu", e)
 
         if 507 == resp.status_code:
             self.lineEdit.clear()

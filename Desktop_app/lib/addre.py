@@ -122,8 +122,8 @@ class Ui_Form(object):
                                        'arg2': self.Sec.encrypt_(address),
                                        'login': self.Sec.encrypt_(login)})
             check_con(resp)
-        except:
-            return app_error("Wystąpił błąd przy dodawaniu.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy dodawaniu.", e)
 
         if 507 == resp.status_code:
             self.clear_all()

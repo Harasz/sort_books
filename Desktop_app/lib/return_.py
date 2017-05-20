@@ -88,8 +88,8 @@ class Ui_Form(object):
                                  data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                 return False
-        except:
-            return app_error("Wystąpił błąd podczas pobierania informacji")
+        except Exception as e:
+            return app_error("Wystąpił błąd podczas pobierania informacji.", e)
 
         if resp.status_code == 204:
             self.label.setStyleSheet("color: green;")
@@ -116,7 +116,7 @@ class Ui_Form(object):
                                  data={'arg1': self.Sec.encrypt_(na),
                                        'key': open('.cache', 'r').read()})
             check_con(resp)
-        except:
+        except Exception as e:
             self.label.setStyleSheet("color: red;")
             self.label.setText("Wystąpił błąd.")
             return self.get_list()

@@ -127,8 +127,8 @@ class Ui_Form(object):
                                  data={'key': open('.cache', 'r').read()})
             if check_con(resp):
                 return False
-        except:
-            return app_error("Wystąpił błąd podczas pobierania informacji.")
+        except Exception as e:
+            return app_error("Wystąpił błąd podczas pobierania informacji.", e)
 
         self.data = self.Sec.encode_data(json.loads(resp.text))
         i = 0
@@ -174,8 +174,8 @@ class Ui_Form(object):
                                        'arg2': self.Sec.encrypt_(address),
                                        'name_id': self.Sec.encrypt_(self.na)})
             check_con(resp)
-        except:
-            return app_error("Wystąpił błąd przy edytowaniu.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy edytowaniu.", e)
 
         if 200 == resp.status_code:
             self.formLayoutWidget_2.hide()

@@ -114,8 +114,8 @@ class Ui_Form(object):
                                        'key': open('.cache', 'r').read()},
                                  files=files)
             check_con(resp)
-        except Exception:
-            return app_error("Wystąpił błąd przy dodawaniu.")
+        except Exception as e:
+            return app_error("Wystąpił błąd przy dodawaniu.", e)
 
         self.cover = None
 

@@ -107,8 +107,8 @@ class Ui_Form(object):
                                        'pass_': self.Sec.encrypt_(new_pass)})
             if check_con(resp):
                 return False
-        except:
-            return app_error("Wystąpił błąd podczas pobierania informacji.")
+        except Exception as e:
+            return app_error("Wystąpił błąd podczas pobierania informacji.", e)
 
         if resp.status_code == 200:
             self.editInfo()

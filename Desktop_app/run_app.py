@@ -36,8 +36,8 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
                                  data={'login': self.Sec.encrypt_(login),
                                        'pass_': self.Sec.encrypt_(pass_),
                                        'publicKey': self.Sec.get_public()})
-        except requests.ConnectionError:
-            return app_error("Nie można nawiązać połączenia z serwerem.")
+        except requests.ConnectionError as e:
+            return app_error("Nie można nawiązać połączenia z serwerem.", e)
 
         if resp.status_code == 200:
             data = json.loads(resp.text)
@@ -48,21 +48,22 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
                 open('.cache', "wb").write(data['auth'].encode())
             ctypes.windll.kernel32.SetFileAttributesW('.cache', 0x02)
             self.dialog.close()
-            return self.st_ap(self.Sec.decrypt_(data['master']))
-        else:
+            return self.st_ap(self.Sec.decrypt_(data['master']), self.Sec.decrypt_(data['data']))
+        elif resp.status_code == 406:
             return app_error("Dane użyte do logowania są niepoprawne.")
+        else:
+            return app_error("Wystąpił nieznany błąd podczas przetwarzania danych.")
 
-
-    def st_ap(self, data):
-        self.setupUi_2(self.window, self.Config, self.Sec, data)
+    def st_ap(self, data, date):
+        self.setupUi_2(self.window, self.Config, self.Sec, data, date)
         self.retranslateUi_2(self.window)
         return self.window.show()
 
     def get_key(self, stop=False):
         try:
             resp = requests.get(self.Config.get_server()+'/api/key')
-        except requests.ConnectionError:
-            app_error("Nie można nawiązać połączenia z serwerem.")
+        except requests.ConnectionError as e:
+            app_error("Nie można nawiązać połączenia z serwerem.", e)
             return exit()
 
         if resp.status_code == 200:
