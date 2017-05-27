@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_restful import Resource
 from hashlib import sha512
 from sort_api import cur, auth_k, parser, Sec, login_required
+from datetime import date
 
 
 class API_librariansPass(Resource):
@@ -25,7 +26,8 @@ class API_librariansPass(Resource):
 			
 			if resp[0] == pass_old:
 				pass_new = sha512(data['pass_'].encode()).hexdigest()
-				cur.execute("UPDATE librarians.user SET haslo=%s WHERE id=%s;", (pass_new, user_id))
+				data = date.today()
+				cur.execute("UPDATE librarians.user SET haslo=%s, last=%s WHERE id=%s;", (pass_new, data.isoformat(), user_id))
 				return {'status': 'zmieniono'}, 200
 			else:
 				return {'status': 'rozne'}, 409

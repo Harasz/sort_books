@@ -23,10 +23,14 @@
 #
 
 from flask import Flask, session, redirect, url_for
+from flask_recaptcha import ReCaptcha
 from random import sample
 from configparser import ConfigParser
-import psycopg2
 from functools import wraps
+from smtpConf import SMTP_conn
+from ast import literal_eval
+import psycopg2
+
 
 app = Flask(__name__)
 app.secret_key = ''.join(sample('qwertyuiopasdfgjhklzxcvbnm1234567890', 10))
@@ -34,6 +38,15 @@ app.secret_key = ''.join(sample('qwertyuiopasdfgjhklzxcvbnm1234567890', 10))
 
 conf = ConfigParser()
 conf.read(filenames='./server.cfg')
+
+app.config.update({
+	"RECAPTCHA_SITE_KEY": conf['RECAPTCHA']['Site_Key'],
+	"RECAPTCHA_SITE_SECRET": conf['RECAPTCHA']['Secret_Key'],
+	"RECAPTCHA_ENABLED": literal_eval(conf['RECAPTCHA']['Enabled']),
+})
+
+recaptcha = ReCaptcha()
+recaptcha.init_app(app)
 
 try:
 	conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],
@@ -43,7 +56,19 @@ try:
 	conn.autocommit = True
 	cur = conn.cursor()
 except Exception as e:
-	print_error("Wystapił bład z bazą danych:\n"+str(e))
+	print("[Error] Wystapił bład z bazą danych:\n"+str(e))
+	exit()
+
+
+try:
+	smtp = SMTP_conn(address = conf['SMTP']['Address'],
+					port = conf['SMTP']['Port'],
+					login = conf['SMTP']['E-mail'],
+					password = conf['SMTP']['Password'])
+except Exception as e:
+	print("[Error] Wystapił bład z serwerem SMTP:\n"+str(e))
+	exit()
+	
 
 def login_required(func):
 	@wraps(func)

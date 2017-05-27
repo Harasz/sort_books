@@ -1,6 +1,8 @@
 from flask import render_template, Blueprint, session, redirect, url_for, request, abort
-from sort_books import cur, login_required
+from sort_books import cur, login_required, smtp
 from hashlib import sha512
+from random import sample
+
 
 acc_blueprint = Blueprint('acc_blueprint', __name__)
 

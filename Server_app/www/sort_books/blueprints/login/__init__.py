@@ -1,9 +1,11 @@
 from flask import render_template, Blueprint, session, redirect, url_for, request
-from sort_books import cur, login_required
+from sort_books import cur, login_required, smtp, recaptcha
 from hashlib import sha512
+from random import sample, choice
 
 
 login_blueprint = Blueprint('login_blueprint', __name__)
+pass_code = []
 
 
 @login_blueprint.route('/login', methods=['POST', 'GET'])
@@ -16,6 +18,8 @@ def auth_in():
 	
 	try:
 		if request.method == 'POST' and not 'auth' in session:
+			if not recaptcha.verify():
+				raise LoginError("Captcha nie jest poprawna")
 			resp = auth(request.form['username'], sha512(request.form['password'].encode('UTF-8')).hexdigest())
 			if resp:
 				session['auth'] = {'id': resp[0], 'username': resp[1], 'address': resp[2], 'email': resp[3], 'login': resp[6]}
@@ -65,6 +69,9 @@ def auth_adjust():
 				
 				cur.execute("INSERT INTO librarians.readers_pref VALUES (%s, %s, %s, %s);", (session['auth']['id'], allow_email, allow_address, allow_profile))
 				cur.execute("UPDATE librarians.readers SET loged=true WHERE id_r=%s;", (session['auth']['id'], ))
+				text = open("email/NewUserEmail.txt").read()
+				smtp.sendEmail(session['auth']['email'], 'Sort Books - Witamy!',
+							   text.format(name=session['auth']['username']))
 				return render_template('adj.html', step=4)
 		else:
 			return render_template('adj.html', step=1)
@@ -72,6 +79,44 @@ def auth_adjust():
 		return redirect(url_for('index_blueprint.index'))
 
 
+@login_blueprint.route('/login/remind',  methods=['POST', 'GET'])
+def remind():
+	if request.method == 'POST':
+		if 'email' in request.form:
+			cur.execute("SELECT id_r FROM librarians.readers WHERE email=%s;", (request.form['email'], ))
+			resp = cur.fetchone()
+			if resp:
+				code = ''.join(sample('qwertyuiopasdfghjklzxcvbnm1234567890', 32))
+				pass_code.append((code, resp[0]))
+				text = open("email/RemindPass.txt").read()
+				smtp.sendEmail(request.form['email'], 'Sort Books - Przypomnienie hasła',
+							   text.format(url=request.url+'?key='+code))
+				return render_template('remind.html', step=2)
+			else:
+				return render_template('remind.html', step=1, error="Żadne konto nie jest przypisane do tego adresu email")
+		elif 'key' in request.form:
+			if request.form['pass'] == request.form['pass2']:
+				index = [x for x in pass_code if x[0]==request.form['key']][0]
+				pass_code.remove(index)
+				cur.execute("UPDATE librarians.readers SET pass=%s WHERE id_r=%s;", 
+							(sha512(request.form['pass'].encode('UTF-8')).hexdigest(), index[1]))
+				return render_template('remind.html', step=4)
+			else:
+				return render_template('remind.html', step=3, key=request.form['key'], error="Hasła nie są identyczne")
+		else:
+			return render_template('remind.html', step=1, error="Wystąpił błąd w zapytaniu")
+	else:
+		if request.args.get("key"):
+			try:
+				if request.args.get("key") == [x[0] for x in pass_code][0]:
+					return render_template('remind.html', step=3, key=request.args.get("key"))
+			except IndexError:
+				pass
+			return render_template('remind.html', step=1, error="Wystąpił błąd w zapytaniu")
+		else:
+			return render_template('remind.html', step=1)
+
+
 def auth(login, pas):
-	cur.execute("SELECT * FROM librarians.readers WHERE login=%s OR email=%s AND pass=%s;", (login, login, pas))
+	cur.execute("SELECT * FROM librarians.readers WHERE (login=%s OR email=%s) AND pass=%s;", (login, login, pas))
 	return cur.fetchone()

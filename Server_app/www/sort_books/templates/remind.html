@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %} Przypomnij hasło {% endblock %}
+{% block content %}
+	
+		{% if error: %}
+			<div class="alert alert-danger alert-dismissable">
+				<a href="#" class="close" data-dismiss="alert" aria-label="close">×</a>
+  				<strong>Uwaga!</strong> {{error}}
+			</div>
+		{% endif %}
+
+		{% if step==1 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+			<p>Podaj swój adres e-mail przypisany do konta:</p>
+			<form method="post" action="/login/remind">
+
+				<input type="email" name="email" placeholder="Podaj e-mail" class="adjust" required> <br>
+
+				<input type="submit" value="Dalej" class="adjust">
+
+			</form>
+		</div>
+		{% elif step==2 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+			<p>Na podany adres e-mail został wysłany link, który pomoże Ci zresetować twoje hasło.</p>
+		</div>
+
+		{% elif step==3:%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+			<p>Teraz możesz ustawić swoje nowe hasło:</p>
+			<form method="post" action="/login/remind">
+
+				<input type="password" name="pass" placeholder="Nowe hasło" class="adjust" required> <br>
+				<input type="password" name="pass2" placeholder="Powtórz hasło" class="adjust" required> <br>
+
+				<input type="hidden" name="key" value="{{key}}">
+				<input type="submit" value="Dalej" class="adjust">
+
+			</form>
+		</div>
+		{% elif step==4 :%}
+		<div class="panel_login" style="width: 50%; margin-left: 25%;">
+			<p>Twoje hasło zostało pomyślnie zmienione, teraz możesz się zalogować na swoje konto! Zostaniesz zaraz przekierowany do formularza logowań, lub możesz kliknąć <a href="/login">tutaj</a>.</p>
+			<script type="text/javascript">
+				var time = setTimeout(function() {
+					window.location = '/login'
+				}, 3000);
+			</script>
+		</div>
+		{% endif %}
+{% endblock %}

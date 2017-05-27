@@ -21,7 +21,7 @@ class API_getBorrows(Resource):
 			ORDER BY bor.id_br ASC;
 			""")
 			
-			resp = cur.fetchall()
+			respp = cur.fetchall()
 			if resp:
 				ret = {}
 				pub = open('pem/'+data['key']+'.pem', 'rb').read()
