@@ -34,8 +34,11 @@ class SMTP_conn():
 			self.conn.sendmail(self.login, to, msg.as_string())
 			return True
 		except Exception as e:
-			if e[0] == 451:
-				self.getConn()
-				return self.sendEmail(to, subject, text)
+			try:
+				if e[0] == 451:
+					self.getConn()
+					return self.sendEmail(to, subject, text)
+			except:
+				pass
 			print("[Error] Bład z wysłaniem email: \n"+str(e))
 			return False

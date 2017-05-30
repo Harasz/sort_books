@@ -6,10 +6,11 @@
 #
 # WARNING! All changes made in this file will be lost!
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from error import app_error, check_con
 import requests
 import json
+import re
 
 
 class Ui_Form(object):
@@ -93,6 +94,9 @@ class Ui_Form(object):
 
         if name == '' or surname == '' or email == '':
             return app_error("Uzupełnij wszystkie dane")
+
+        if re.match("\w+@\w+(?:\.\w+)", email) == None:
+            return app_error("E-mial nie jest poprawny.")
 
         try:
             resp = requests.post(self.Config.get_server()+'/api/addlibrarian',

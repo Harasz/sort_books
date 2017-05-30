@@ -3,7 +3,7 @@
 #
 #  __init__.py
 #  
-#  Copyright 2017 root <root@lap>
+#  Copyright 2017 Jakub Sydor
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -28,7 +28,6 @@ from random import sample
 from configparser import ConfigParser
 from functools import wraps
 from smtpConf import SMTP_conn
-from ast import literal_eval
 import psycopg2
 
 
@@ -39,14 +38,6 @@ app.secret_key = ''.join(sample('qwertyuiopasdfgjhklzxcvbnm1234567890', 10))
 conf = ConfigParser()
 conf.read(filenames='./server.cfg')
 
-app.config.update({
-	"RECAPTCHA_SITE_KEY": conf['RECAPTCHA']['Site_Key'],
-	"RECAPTCHA_SITE_SECRET": conf['RECAPTCHA']['Secret_Key'],
-	"RECAPTCHA_ENABLED": literal_eval(conf['RECAPTCHA']['Enabled']),
-})
-
-recaptcha = ReCaptcha()
-recaptcha.init_app(app)
 
 try:
 	conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],

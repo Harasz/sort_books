@@ -214,7 +214,7 @@ class Sort_books(object):
         MainWindow.setTabOrder(self.pushButton_5, self.pushButton_6)
         MainWindow.setTabOrder(self.pushButton_6, self.pushButton_7)
 
-        if date:
+        if date.decode() == '1':
             self.needPass()
 
 

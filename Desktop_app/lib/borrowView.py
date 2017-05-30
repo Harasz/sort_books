@@ -90,7 +90,8 @@ class Ui_Form(object):
         except Exception as e:
             return app_error("Wystąpił błąd przy pobieraniu danych.", e)
 
-        self.data = self.Sec.encode_data(json.loads(resp.text))
+        if resp.text:
+            self.data = self.Sec.encode_data(json.loads(resp.text))
 
         for key, value in self.data.items():
             self.itemModel.setItem(int(key), 0, QtGui.QStandardItem(value[1]))

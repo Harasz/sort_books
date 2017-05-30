@@ -96,8 +96,9 @@ class Ui_Form(object):
             self.label.setText("Brak wypożyczeń.")
             return False
 
-        data = self.Sec.encode_data(json.loads(resp.text))
-        self.data = [y for x, y in data.items() if y[3] == 'False']
+        if resp.text:
+            data = self.Sec.encode_data(json.loads(resp.text))
+            self.data = [y for x, y in data.items() if y[3] == 'False']
         button = []
         i = 0
         for value in self.data:

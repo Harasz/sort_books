@@ -127,7 +127,8 @@ class Ui_Form(object):
         except Exception as e:
             return app_error("Wystapił problem przy pobieraniu danych.", e)
 
-        data = self.Sec.encode_data(json.loads(resp.text))
+        if resp.text:
+            data = self.Sec.encode_data(json.loads(resp.text))
         self.list_1 = {}
         list = []
         for key, value in data.items():
@@ -144,7 +145,8 @@ class Ui_Form(object):
         except Exception as e:
             return app_error("Wystąpił błąd przy pobieraniu danych", e)
 
-        data = self.Sec.encode_data(json.loads(resp.text))
+        if resp.text:
+            data = self.Sec.encode_data(json.loads(resp.text))
         self.list_2 = {}
         list = []
         for key, value in data.items():

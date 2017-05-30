@@ -14,7 +14,7 @@ def check_ext(f):
 
 class API_bookEdit(Resource):
 
-	def post(self, data):
+	def post(self):
 
 		data = Sec.encode_data(parser.parse_args())	
 
@@ -22,7 +22,7 @@ class API_bookEdit(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 
 		try:
-			if request.files['cover'] and check_ext(request.files['cover']):
+			if 'cover' in request.files and check_ext(request.files['cover']):
 				f = request.files['cover']
 				cover = secure_filename(data['arg1'])
 				f.save(

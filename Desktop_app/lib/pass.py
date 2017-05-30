@@ -10,6 +10,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from error import check_con, app_error
 import requests
 
+
 class Ui_Form(object):
     def setupUi(self, Form, Config, Sec):
         self.Form = Form
@@ -96,6 +97,12 @@ class Ui_Form(object):
         if old_pass == '' or new_pass == '' or new_pass_2 == '':
             return app_error("Uzupełnij wszystkie dane.")
 
+        if old_pass == new_pass:
+            return app_error("Nowe hasło nie może być takie same jak stare.")
+
+        if not self.validPass(new_pass):
+            return app_error("Hasło jest za słabe.\nMusi mieć co najmniej 6 znaków oraz składać się z cyfr i liter.")
+
         if not new_pass == new_pass_2:
             app_error("Nowe hasła nie są identyczne!")
             return self.clearLine()
@@ -134,3 +141,15 @@ class Ui_Form(object):
         self.lineEdit.clear()
         self.lineEdit_2.clear()
         return self.lineEdit_3.clear()
+
+
+    def validPass(self, password):
+        if len(password) > 5:
+            if any(x.isdigit() for x in password):
+                if any(x.isalpha() for x in password):
+                    return True
+                else:
+                    return False
+            return False
+        else:
+            return False

@@ -120,7 +120,8 @@ class Ui_Form(object):
         except Exception as e:
             return app_error("Wystąpił błąd podczas pobierania informacji.", e)
 
-        self.data = self.Sec.encode_data(json.loads(resp.text))
+        if resp.text:
+            self.data = self.Sec.encode_data(json.loads(resp.text))
         button = []
         i = 0
         for key, value in self.data.items():

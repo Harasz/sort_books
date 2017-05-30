@@ -23,12 +23,12 @@ class API_addBook(Resource):
 			return {'status': 'brak autoryzacji'}, 401
 		
 		try:
-			if request.files['cover'] and check_ext(request.files['cover']):
+			if 'cover' in request.files and check_ext(request.files['cover']):
 				f = request.files['cover']
 				cover = secure_filename(data['arg1'])
 				f.save(
 						os.path.join('sort_api/image/'+cover+'.'+f.filename.split('.')[1])
-					  )
+					)
 		
 			cur.execute("SELECT * FROM librarians.books WHERE title=%s AND author=%s;", (data['arg1'], data['arg2']))
 			resp = cur.fetchone()
@@ -37,8 +37,8 @@ class API_addBook(Resource):
 				return {'status': 'istnieje/dodano'}, 507
 			else:
 				cur.execute("""INSERT INTO librarians.books
-								VALUES (default, %s, %s, %s);""",
-								(data['arg1'], data['arg2'], data['arg3']))
+							   VALUES (default, %s, %s, %s);""",
+							(data['arg1'], data['arg2'], data['arg3']))
 				return {'status': 'dodano'}, 201
 		except Exception:
 			return {'status': 'wystapil blad'}, 500

@@ -15,7 +15,7 @@ from error import check_con, app_error
 
 class Ui_Form(object):
 
-    data = None
+    data = {}
     button = []
 
     def setupUi(self, Form, Config, Sec):
@@ -132,7 +132,9 @@ class Ui_Form(object):
         except Exception as e:
             return app_error("Wystąpił błąd przy pobieraniu danych.", e)
 
-        self.data = self.Sec.encode_data(json.loads(resp.text))
+        if resp.text:
+            self.data = self.Sec.encode_data(json.loads(resp.text))
+
         self.button = []
         i = 0
         for key, value in self.data.items():

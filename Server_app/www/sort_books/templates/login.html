@@ -16,11 +16,17 @@
 				<input type="text" name="username" placeholder="Login lub e-mail użytkownika" class="adjust" required> <br>
 				<input type="password" name="password" placeholder="Hasło dostępowe" class="adjust" required> <br>
 
-				<div style="margin-left: -35px;"><br>{{ recaptcha }}<br></div>
+				{% if site_key:%}
+					<script src='https://www.google.com/recaptcha/api.js'></script>
+					<br>
+					<div style="margin-left: -35px;" class="g-recaptcha" data-sitekey="{{site_key}}"></div>
+					<br>
+				{% endif %}
 
 				<input type="submit" value="Zaloguj" class="adjust">
 
 			</form>
+			<a href="{{ url_for('login_blueprint.remind') }}">Zapomniałem hasła</a>
 		</div>
 
 {% endblock %}

@@ -1,11 +1,41 @@
 from flask import render_template, Blueprint, session, redirect, url_for, request
-from sort_books import cur, login_required, smtp, recaptcha
+from sort_books import cur, login_required, smtp, conf
 from hashlib import sha512
 from random import sample, choice
+from ast import literal_eval
+from requests import get
+import json
+
+
+class reCaptcha(object):
+	
+	site_key = conf['RECAPTCHA']['Site_Key']
+	private_key = conf['RECAPTCHA']['Secret_Key']
+	enable = literal_eval(conf['RECAPTCHA']['Enabled'])
+	google_api = 'https://www.google.com/recaptcha/api/siteverify'
+	
+	def getSiteKey(self):
+		if self.enable:
+			return self.site_key
+		else:
+			return False
+	
+	def verify(self):
+		if self.enable:
+			resp = get(self.google_api,
+					   params = {
+								'secret': self.private_key,
+								'response': request.form['g-recaptcha-response'],
+								'remoteip': request.environ['REMOTE_ADDR']
+								}
+					   )
+			return json.loads(resp.text)['success']
+		else: return True
 
 
 login_blueprint = Blueprint('login_blueprint', __name__)
 pass_code = []
+captcha = reCaptcha()
 
 
 @login_blueprint.route('/login', methods=['POST', 'GET'])
@@ -18,7 +48,7 @@ def auth_in():
 	
 	try:
 		if request.method == 'POST' and not 'auth' in session:
-			if not recaptcha.verify():
+			if not captcha.verify():
 				raise LoginError("Captcha nie jest poprawna")
 			resp = auth(request.form['username'], sha512(request.form['password'].encode('UTF-8')).hexdigest())
 			if resp:
@@ -32,7 +62,7 @@ def auth_in():
 				raise LoginError('Błędne dane logowania!')
 	except LoginError as fail:
 		error=fail
-	return render_template('login.html', error=error)
+	return render_template('login.html', error=error, site_key=captcha.getSiteKey())
 
 
 @login_blueprint.route('/logout')
@@ -48,9 +78,13 @@ def auth_adjust():
 		if request.method == 'POST':
 			if 'email' in request.form:
 				if request.form['email'] == request.form['email2']:
-					cur.execute("UPDATE librarians.readers SET email=%s WHERE id_r=%s;", (request.form['email'], session['auth']['id']))
-					session['auth']['email'] = request.form['email']
-					return render_template('adj.html', step=2)
+					cur.execute("SELECT * FROM librarians.readers WHERE email=%s;", (request.form['email'], ))
+					if not cur.fetchone():
+						cur.execute("UPDATE librarians.readers SET email=%s WHERE id_r=%s;", (request.form['email'], session['auth']['id']))
+						session['auth']['email'] = request.form['email']
+						return render_template('adj.html', step=2)
+					else:
+						return render_template('adj.html', error="Podany adres email jest już w użyciu", step=1) 
 				else:
 					return render_template('adj.html', step=1, error="Podane adresy email nie są identyczne")
 			elif 'pass' in request.form:

@@ -19,6 +19,7 @@ class API_appLogin(Resource):
 			resp = cur.fetchone()
 			if resp:
 				d = date.today() - resp[6]
+				print(d.days)
 				if d.days >= 30:
 					d = '1'
 				else:

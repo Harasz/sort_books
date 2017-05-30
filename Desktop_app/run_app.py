@@ -20,13 +20,13 @@ class MainApplication(QtWidgets.QWidget, Login_form, Sort_books):
         self.Config = ServerConfig()
         self.Sec = Secure()
 
+        self.get_key()
         self.dialog.show()
 
 
     def loginAction(self):
         login = self.lineEdit.text()
         pass_ = self.lineEdit_2.text()
-        self.get_key()
 
         if login is '' or pass_ is '':
             return app_error("Uzupełnij wszystkie dane.")

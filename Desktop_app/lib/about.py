@@ -111,7 +111,7 @@ class Ui_Form(object):
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.gridLayout.addWidget(self.scrollArea, 3, 0, 2, 3)
         self.progressBar = QtWidgets.QProgressBar(Dialog)
-        self.progressBar.setProperty("value", 87)
+        self.progressBar.setProperty("value", 100)
         self.progressBar.setObjectName("progressBar")
         self.gridLayout.addWidget(self.progressBar, 1, 2, 1, 1)
         self.label = QtWidgets.QLabel(Dialog)
