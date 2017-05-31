@@ -1,44 +1,45 @@
-from smtplib import SMTP, SMTP_SSL
+from smtplib import SMTP_SSL
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import ssl
 
 
 class SMTP_conn():
 
-	def __init__(self, address = 'localhost', port = '25', login = '', password = ''):
-		self.address = address
-		self.port = port
-		self.login = login
-		self.password = password
+    conn = None
 
-		self.getConn()
+    def __init__(self, address='localhost', port='25', login='', password=''):
+        self.address = address
+        self.port = port
+        self.login = login
+        self.password = password
 
-	def getConn(self):
-		try:
-			self.conn = SMTP_SSL(self.address, self.port)
-			self.conn.ehlo()
-			self.conn.login(self.login, self.password)
-		except Exception as e:
-			print("[Error] Błąd podczas łączenia z serwerem SMTP:\n"+str(e))
+        self.getConn()
 
-	def sendEmail(self, to, subject, text):
-		msg = MIMEMultipart()
+    def getConn(self):
+        try:
+            self.conn = SMTP_SSL(self.address, self.port)
+            self.conn.ehlo()
+            self.conn.login(self.login, self.password)
+        except Exception as e:
+            print("[Error] Błąd podczas łączenia z serwerem SMTP:\n"+str(e))
 
-		msg['From'] = self.login
-		msg['To'] = to
-		msg['Subject'] = subject
-		msg.attach(MIMEText(text, 'html'))
+    def sendEmail(self, to, subject, text):
+        msg = MIMEMultipart()
 
-		try:
-			self.conn.sendmail(self.login, to, msg.as_string())
-			return True
-		except Exception as e:
-			try:
-				if e[0] == 451:
-					self.getConn()
-					return self.sendEmail(to, subject, text)
-			except:
-				pass
-			print("[Error] Bład z wysłaniem email: \n"+str(e))
-			return False
+        msg['From'] = self.login
+        msg['To'] = to
+        msg['Subject'] = subject
+        msg.attach(MIMEText(text, 'html'))
+
+        try:
+            self.conn.sendmail(self.login, to, msg.as_string())
+            return True
+        except Exception as e:
+            try:
+                if e[0] == 451:
+                    self.getConn()
+                    return self.sendEmail(to, subject, text)
+            except:
+                pass
+            print("[Error] Bład z wysłaniem email: \n"+str(e))
+            return False

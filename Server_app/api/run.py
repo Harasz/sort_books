@@ -29,18 +29,18 @@ import os
 
 
 def clear_pem():
-	for pem_file in glob.glob('pem/*.pem'):
-		os.remove(pem_file)
+    for pem_file in glob.glob('pem/*.pem'):
+        os.remove(pem_file)
 
 
 if __name__ == '__main__':
-	
-	clear_pem()
-	class_api.Sort_Books_API()
-	
-	conf = ConfigParser()
-	conf.read(filenames='server.cfg')
-	
-	app.run(host=conf['GENERAL']['Address'],
-			port=int(conf['GENERAL']['Port']),
-			debug=conf['GENERAL']['Debug'])
+
+    clear_pem()
+    class_api.Sort_Books_API()
+
+    conf = ConfigParser()
+    conf.read(filenames='server.cfg')
+
+    app.run(host=conf['GENERAL']['Address'],
+            port=int(conf['GENERAL']['Port']),
+            debug=conf['GENERAL']['Debug'])

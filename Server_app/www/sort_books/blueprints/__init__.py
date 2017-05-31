@@ -1,7 +1,7 @@
 #
 #  __init__.py
 #  
-#  Copyright 2017 Jakub Sydor <hi@jakub.ovh>
+#  Copyright 2017 Jakub Sydor
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by

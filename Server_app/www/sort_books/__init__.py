@@ -23,7 +23,6 @@
 #
 
 from flask import Flask, session, redirect, url_for
-from flask_recaptcha import ReCaptcha
 from random import sample
 from configparser import ConfigParser
 from functools import wraps
@@ -40,34 +39,34 @@ conf.read(filenames='./server.cfg')
 
 
 try:
-	conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],
-							user=conf['SERVER_SQL']['User'],
-							host=conf['SERVER_SQL']['Address'],
-							password=conf['SERVER_SQL']['Password'])
-	conn.autocommit = True
-	cur = conn.cursor()
+    conn = psycopg2.connect(dbname=conf['SERVER_SQL']['Database'],
+                            user=conf['SERVER_SQL']['User'],
+                            host=conf['SERVER_SQL']['Address'],
+                            password=conf['SERVER_SQL']['Password'])
+    conn.autocommit = True
+    cur = conn.cursor()
 except Exception as e:
-	print("[Error] Wystapił bład z bazą danych:\n"+str(e))
-	exit()
+    print("[Error] Wystapił bład z bazą danych:\n"+str(e))
+    exit()
 
 
 try:
-	smtp = SMTP_conn(address = conf['SMTP']['Address'],
-					port = conf['SMTP']['Port'],
-					login = conf['SMTP']['E-mail'],
-					password = conf['SMTP']['Password'])
+    smtp = SMTP_conn(address=conf['SMTP']['Address'],
+                    port=conf['SMTP']['Port'],
+                    login=conf['SMTP']['E-mail'],
+                    password=conf['SMTP']['Password'])
 except Exception as e:
-	print("[Error] Wystapił bład z serwerem SMTP:\n"+str(e))
-	exit()
-	
+    print("[Error] Wystapił bład z serwerem SMTP:\n"+str(e))
+    exit()
+
 
 def login_required(func):
-	@wraps(func)
-	def check(*args, **kwargs):
-		if 'auth' in session:
-			return func(*args, **kwargs)
-		return redirect(url_for('login_blueprint.auth_in'))
-	return check
+    @wraps(func)
+    def check(*args, **kwargs):
+        if 'auth' in session:
+            return func(*args, **kwargs)
+        return redirect(url_for('login_blueprint.auth_in'))
+    return check
 
 
 from sort_books import views, error_handler

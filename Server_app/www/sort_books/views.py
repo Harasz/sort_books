@@ -1,4 +1,3 @@
-from flask import render_template, Blueprint, session, url_for, redirect
 from .blueprints.index import index_blueprint
 from .blueprints.login import login_blueprint
 from .blueprints.acc import acc_blueprint
@@ -18,4 +17,4 @@ app.register_blueprint(rank_blueprint)
 
 @app.template_filter('split_space')
 def split_space(s):
-	return s.split(' ')[0]
+    return s.split(' ')[0]
